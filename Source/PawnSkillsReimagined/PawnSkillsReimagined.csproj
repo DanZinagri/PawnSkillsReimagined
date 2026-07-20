@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<RootNamespace>PawnSkillsReimagined</RootNamespace>
+		<AssemblyName>PawnSkillsReimagined</AssemblyName>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Nullable>disable</Nullable>
+		<DebugType>embedded</DebugType>
+		<!-- Point these at your own installs if they live somewhere else. -->
+		<RimWorldManagedDir>E:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed</RimWorldManagedDir>
+		<HarmonyDir>E:\SteamLibrary\steamapps\workshop\content\294100\2009463077\Current\Assemblies</HarmonyDir>
+		<VSEDir>E:\SteamLibrary\steamapps\workshop\content\294100\3400246558\1.6\Assemblies</VSEDir>
+		<OutputPath>..\..\1.6\Assemblies\</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Reference Include="Assembly-CSharp">
+			<HintPath>$(RimWorldManagedDir)\Assembly-CSharp.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>$(RimWorldManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="UnityEngine.IMGUIModule">
+			<HintPath>$(RimWorldManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>$(RimWorldManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="0Harmony">
+			<HintPath>$(HarmonyDir)\0Harmony.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="VSE">
+			<HintPath>$(VSEDir)\VSE.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+    <!-- Inspect-pane tab label -->
+    <PSR_TabSkills>Skills</PSR_TabSkills>
+    <PSR_Settings>Pawn Skills Reimagined</PSR_Settings>
+
+    <!-- Settings: rows (label + tooltip) -->
+    <PSR_MaxSkillLevel>Max skill level (hard cap)</PSR_MaxSkillLevel>
+    <PSR_MaxSkillLevel_Desc>Skills cannot be raised past this rank. Stat scaling is balanced across the whole range: a maxed skill is slightly stronger than vanilla level 20, regardless of what this is set to.</PSR_MaxSkillLevel_Desc>
+    <PSR_MaxCharacterLevel>Max character level</PSR_MaxCharacterLevel>
+    <PSR_MaxCharacterLevel_Desc>The pawn level cap. Tracked separately from skills; with variable point costs this leaves leeway and rewards passion investment.</PSR_MaxCharacterLevel_Desc>
+    <PSR_PointsPerLevel>Skill points per level</PSR_PointsPerLevel>
+    <PSR_PointsPerLevel_Desc>Points granted per character level-up. Spent on skill ranks at the passion-based costs below.</PSR_PointsPerLevel_Desc>
+    <PSR_ExpertiseCost>Expertise point cost</PSR_ExpertiseCost>
+    <PSR_ExpertiseCost_Desc>Point cost per level of a Vanilla Skills Expanded expertise (capped at 20 levels).</PSR_ExpertiseCost_Desc>
+    <PSR_TopEndTempering>Chance stat tempering</PSR_TopEndTempering>
+    <PSR_TopEndTempering_Desc>Limits how far outcome chances scale at high skill - surgery success, taming, construct success and similar - so they can't spiral toward 100%. Lower values temper harder. Work speeds and yields scale freely and ignore this, as do curve-bounded stats like melee, shooting and dodge.</PSR_TopEndTempering_Desc>
+    <PSR_QualityBump>Quality bump chance</PSR_QualityBump>
+    <PSR_QualityBump_Desc>Once a skill's scaling passes the vanilla-20 equivalent, each bonus vanilla-level adds this chance for one extra crafting quality step.</PSR_QualityBump_Desc>
+    <PSR_XpConversion>XP conversion rate</PSR_XpConversion>
+    <PSR_XpConversion_Desc>Skill XP earned from work and combat is multiplied by this before feeding the pawn's level. 1 = every point of skill XP counts.</PSR_XpConversion_Desc>
+    <PSR_XpRequirement>XP required per level</PSR_XpRequirement>
+    <PSR_XpRequirement_Desc>Multiplies the XP needed for each level-up. 1 = the standard curve (100 x level^1.5).</PSR_XpRequirement_Desc>
+
+    <!-- Settings: passion cost section -->
+    <PSR_PassionCostsHeader>Skill rank costs by passion</PSR_PassionCostsHeader>
+    <PSR_PassionCostsNote>Points needed to raise a skill by one rank, based on its passion. Passionate skills are cheaper to train. Costs are not refunded if a passion changes later.</PSR_PassionCostsNote>
+    <PSR_OtherPassions>Other passions</PSR_OtherPassions>
+    <PSR_OtherPassions_Desc>Cost for any passion not listed above - modded passions, which usually have variable learning rates.</PSR_OtherPassions_Desc>
+
+    <!-- Settings: footer note. {0} = current level cap -->
+    <PSR_CurveNote>Level XP curve: 100 x level^1.5 x requirement multiplier. Skills gain no XP directly and never decay; passions and learning-rate modifiers change how fast the pawn levels instead. Current level cap: {0}</PSR_CurveNote>
+
+</LanguageData>

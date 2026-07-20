@@ -1,0 +1,11 @@
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\IsekaiSkills\1.6\Assemblies\PawnSkillsReimagined.dll
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\IsekaiSkills\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.csproj.AssemblyReference.cache
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\IsekaiSkills\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.GeneratedMSBuildEditorConfig.editorconfig
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\IsekaiSkills\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.csproj.CoreCompileInputs.cache
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\IsekaiSkills\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.sourcelink.json
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\IsekaiSkills\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.dll
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\1.6\Assemblies\PawnSkillsReimagined.dll
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.csproj.AssemblyReference.cache
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.GeneratedMSBuildEditorConfig.editorconfig
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.csproj.CoreCompileInputs.cache
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.dll
