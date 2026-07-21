@@ -22,6 +22,8 @@
     <PSR_XpConversion_Desc>Skill XP earned from work and combat is multiplied by this before feeding the pawn's level. 1 = every point of skill XP counts.</PSR_XpConversion_Desc>
     <PSR_XpRequirement>XP required per level</PSR_XpRequirement>
     <PSR_XpRequirement_Desc>Multiplies the XP needed for each level-up. 1 = the standard curve (100 x level^1.5).</PSR_XpRequirement_Desc>
+    <PSR_StartingXp>Starting XP multiplier</PSR_StartingXp>
+    <PSR_StartingXp_Desc>The random skill levels vanilla would have rolled for a new pawn (from age and life experience) are converted into starting character XP instead. World pawns spend the resulting points randomly, weighted toward their backstory skills; your starting colonists keep the points for you to spend. 0 disables starting XP.</PSR_StartingXp_Desc>
 
     <!-- Settings: passion cost section -->
     <PSR_PassionCostsHeader>Skill rank costs by passion</PSR_PassionCostsHeader>

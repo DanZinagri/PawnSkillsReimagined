@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -27,8 +28,6 @@ namespace PawnSkillsReimagined
     // (capped at 20).
     public class PawnSkillsReimaginedGameComponent : GameComponent
     {
-        // XP to go from `level` to the next: 100 * level^1.5, floor 100.
-        // Same curve Isekai Leveling uses (level 7 -> 1.85k, level 10 -> 3.16k).
         private const float XpBase = 100f;
         private const float XpExponent = 1.5f;
 
@@ -116,6 +115,62 @@ namespace PawnSkillsReimagined
             if (p.level >= maxLevel)
             {
                 p.xp = 0f;
+            }
+        }
+
+        // Silent XP grant used at pawn generation: levels up without posting
+        // level-up messages (a freshly generated pawn "arriving" at level 12
+        // shouldn't fire 11 notifications).
+        public void GrantStartingXP(Pawn pawn, float amount)
+        {
+            if (pawn == null || amount <= 0f)
+            {
+                return;
+            }
+            PawnProgress p = For(pawn);
+            int maxLevel = MaxLevel;
+            if (p.level >= maxLevel)
+            {
+                return;
+            }
+            p.xp += amount;
+            while (p.level < maxLevel && p.xp >= XpToNext(p.level))
+            {
+                p.xp -= XpToNext(p.level);
+                p.level++;
+            }
+            if (p.level >= maxLevel)
+            {
+                p.xp = 0f;
+            }
+        }
+
+        // Spend all affordable points randomly across usable skills, weighted
+        // toward existing (backstory) ranks so builds follow the pawn's story.
+        // Passion costs apply, so cheap passionate skills naturally soak up more
+        // ranks. Used for generated world pawns.
+        public void AutoSpendPoints(Pawn pawn)
+        {
+            if (pawn?.skills?.skills == null)
+            {
+                return;
+            }
+            int maxSkill = PawnSkillsReimaginedMod.Settings.maxSkillLevel;
+            List<SkillRecord> skills = pawn.skills.skills;
+            while (true)
+            {
+                int available = AvailableFor(pawn);
+                if (available <= 0)
+                {
+                    return;
+                }
+                if (!skills.Where(s => !s.TotallyDisabled && s.levelInt < maxSkill &&
+                        PointCosts.CostFor(s) <= available)
+                        .TryRandomElementByWeight(s => 1f + s.levelInt, out SkillRecord pick) ||
+                    !TrySpendPoint(pawn, pick))
+                {
+                    return;
+                }
             }
         }
 

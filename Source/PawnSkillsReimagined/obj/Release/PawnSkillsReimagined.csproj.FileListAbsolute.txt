@@ -9,3 +9,4 @@ E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnS
 E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.GeneratedMSBuildEditorConfig.editorconfig
 E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.csproj.CoreCompileInputs.cache
 E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.dll
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined\obj\Release\PawnSkillsReimagined.sourcelink.json

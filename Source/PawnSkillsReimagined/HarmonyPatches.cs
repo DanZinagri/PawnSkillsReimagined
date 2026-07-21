@@ -96,10 +96,10 @@ namespace PawnSkillsReimagined
         // Starting skills
         // --------------------------------------------------------------------
 
-        // Starting levels are rebuilt as pure backstory sums. Vanilla's
-        // FinalLevelOfSkill adds a hidden random baseline (~0-4 per skill) on
-        // top of backstories - stripping it keeps totals deterministic:
-        // backstory ranks + spent skill points, nothing else.
+        // Starting levels are rebuilt as pure backstory sums. Vanilla's FinalLevelOfSkill adds a random baseline (~0-4 per skill, age-scaled)
+        // on top of backstories; instead of discarding that roll, its value is priced with vanilla's own skill XP curve and granted as starting
+        // character XP - so pawns "keep" the life experience vanilla intended, expressed as levels and points. World pawns auto-spend the points
+        // randomly (weighted toward their backstory skills); player starting pawns bank them for the player to spend.
         public static void GenerateSkills_Postfix(Pawn pawn)
         {
             if (pawn?.skills?.skills == null)
@@ -107,6 +107,7 @@ namespace PawnSkillsReimagined
                 return;
             }
             List<BackstoryDef> backstories = pawn.story?.AllBackstories;
+            float rolledXp = 0f;
             foreach (SkillRecord record in pawn.skills.skills)
             {
                 int total = 0;
@@ -128,8 +129,29 @@ namespace PawnSkillsReimagined
                         }
                     }
                 }
-                record.levelInt = Mathf.Max(0, total);
+                total = Mathf.Max(0, total);
+
+                // Price the stripped random roll in vanilla skill XP.
+                int rolled = Mathf.Clamp(record.levelInt, 0, 20);
+                for (int level = Mathf.Min(total, 20); level < rolled; level++)
+                {
+                    rolledXp += SkillRecord.XpRequiredToLevelUpFrom(level);
+                }
+
+                record.levelInt = total;
                 record.xpSinceLastLevel = 0f;
+            }
+
+            var comp = PawnSkillsReimaginedGameComponent.Instance;
+            float multiplier = PawnSkillsReimaginedMod.Settings.startingXpMultiplier;
+            if (comp == null || rolledXp <= 0f || multiplier <= 0f)
+            {
+                return;
+            }
+            comp.GrantStartingXP(pawn, rolledXp * multiplier);
+            if (pawn.Faction != Faction.OfPlayer)
+            {
+                comp.AutoSpendPoints(pawn);
             }
         }
 
