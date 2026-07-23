@@ -59,17 +59,6 @@ namespace PawnSkillsReimagined
             return (1f - Mathf.Pow(retention, levelsPast)) / (1f - retention);
         }
 
-        // Level to show in skill UI: the real rank.
-        public static int DisplayLevel(SkillRecord record, bool includeAptitudes)
-        {
-            if (record.TotallyDisabled)
-            {
-                return 0;
-            }
-            int unclamped = record.GetUnclampedLevel();
-            return unclamped > 0 ? unclamped : 0;
-        }
-
         // Fill-bar divisor for the vanilla skill list (replaces the hardcoded 20).
         public static float MaxSkillLevelFloat()
         {

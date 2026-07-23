@@ -41,9 +41,6 @@ namespace PawnSkillsReimagined
                 AccessTools.Method(typeof(SkillNeed_Curve), nameof(SkillNeed_Curve.ValueFor)),
                 prefix: new HarmonyMethod(self, nameof(SkillNeedCurve_Prefix)));
             harmony.Patch(
-                AccessTools.Method(typeof(StatWorker), nameof(StatWorker.GetOffsetsAndFactorsExplanation)),
-                transpiler: new HarmonyMethod(self, nameof(StatExplanation_Transpiler)));
-            harmony.Patch(
                 AccessTools.Method(typeof(QualityUtility), nameof(QualityUtility.GenerateQualityCreatedByPawn),
                     new[] { typeof(Pawn), typeof(SkillDef), typeof(bool) }),
                 postfix: new HarmonyMethod(self, nameof(Quality_Postfix)),
@@ -168,7 +165,10 @@ namespace PawnSkillsReimagined
                 return;
             }
             comp.GrantStartingXP(pawn, rolledXp * multiplier);
-            if (pawn.Faction != Faction.OfPlayer)
+            // OfPlayerSilentFail: during world generation no player faction
+            // exists yet and the loud accessor spams errors (null is fine here -
+            // world pawns have their own faction and should auto-spend).
+            if (pawn.Faction != Faction.OfPlayerSilentFail)
             {
                 comp.AutoSpendPoints(pawn);
             }
@@ -346,28 +346,6 @@ namespace PawnSkillsReimagined
             return false;
         }
 
-        // Show the real (unclamped) skill level in stat breakdowns like
-        // "Melee (25): +2.5" instead of the clamped 20.
-        public static IEnumerable<CodeInstruction> StatExplanation_Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            var getLevel = AccessTools.PropertyGetter(typeof(SkillRecord), nameof(SkillRecord.Level));
-            var explainLevel = AccessTools.Method(typeof(HarmonyPatches), nameof(ExplainLevel));
-            foreach (CodeInstruction instruction in instructions)
-            {
-                if (instruction.Calls(getLevel))
-                {
-                    instruction.opcode = OpCodes.Call;
-                    instruction.operand = explainLevel;
-                }
-                yield return instruction;
-            }
-        }
-
-        public static int ExplainLevel(SkillRecord record)
-        {
-            return SkillLevelUtility.EffectiveLevel(record);
-        }
-
         // Feed the quality roll the stretched level instead of the raw rank, so quality progression follows the same 0..maxSkillLevel journey as the
         // stats (rank 30 of 100 rolls like a vanilla level-7 crafter, not 20).
         public static IEnumerable<CodeInstruction> QualityLevel_Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -479,13 +457,12 @@ namespace PawnSkillsReimagined
         // UI
         // --------------------------------------------------------------------
 
-        // Show the real rank in the skill list, make the fill bar span
-        // 0..maxSkillLevel instead of 0..20, and clamp it for safety.
+        // Make the vanilla skill list's fill bar span 0..maxSkillLevel instead
+        // of 0..20, clamped for safety. (The level number itself is already
+        // real - GetLevel is unclamped at the source.)
         public static IEnumerable<CodeInstruction> DrawSkill_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             var list = instructions.ToList();
-            var getLevel = AccessTools.Method(typeof(SkillRecord), nameof(SkillRecord.GetLevel));
-            var displayLevel = AccessTools.Method(typeof(SkillLevelUtility), nameof(SkillLevelUtility.DisplayLevel));
             var maxSkillLevel = AccessTools.Method(typeof(SkillLevelUtility), nameof(SkillLevelUtility.MaxSkillLevelFloat));
             var mathfMax = AccessTools.Method(typeof(Mathf), nameof(Mathf.Max), new[] { typeof(float), typeof(float) });
             var clamp01 = AccessTools.Method(typeof(Mathf), nameof(Mathf.Clamp01));
@@ -493,13 +470,6 @@ namespace PawnSkillsReimagined
             bool sawFillConstant = false;
             for (int i = 0; i < list.Count; i++)
             {
-                if (list[i].Calls(getLevel))
-                {
-                    // Same stack shape: (SkillRecord, bool) -> int
-                    list[i].opcode = OpCodes.Call;
-                    list[i].operand = displayLevel;
-                    continue;
-                }
                 // The fill-bar divisor: level / 20f -> level / maxSkillLevel.
                 if (list[i].opcode == OpCodes.Ldc_R4 && list[i].OperandIs(20f) &&
                     i + 1 < list.Count && list[i + 1].opcode == OpCodes.Div)

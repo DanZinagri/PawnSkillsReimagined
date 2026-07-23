@@ -74,7 +74,7 @@ namespace PawnSkillsReimagined
             int maxLevel = PawnSkillsReimaginedGameComponent.MaxLevel;
             int maxSkill = PawnSkillsReimaginedMod.Settings.maxSkillLevel;
             int available = comp.AvailableFor(pawn) - PendingCost();
-            bool canSpend = (pawn.Faction == Faction.OfPlayer || pawn.IsPrisonerOfColony) && !pawn.Dead;
+            bool canSpend = (pawn.Faction == Faction.OfPlayerSilentFail || pawn.IsPrisonerOfColony) && !pawn.Dead;
 
             // Header: level + XP bar + points
             Text.Font = GameFont.Medium;
