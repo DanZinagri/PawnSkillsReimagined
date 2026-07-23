@@ -49,6 +49,27 @@ namespace PawnSkillsReimagined
                 postfix: new HarmonyMethod(self, nameof(Quality_Postfix)),
                 transpiler: new HarmonyMethod(self, nameof(QualityLevel_Transpiler)));
 
+            // GetLevel/GetLevelForUI/the Level setter clamp to 0-20; raising that clamp to maxSkillLevel makes every third-party skill UI (RimHUD,
+            // Modern Bio tab, character editors) show real ranks with no per-mod patches.
+            var unclampTranspiler = new HarmonyMethod(self, nameof(LevelClamp_Transpiler));
+            harmony.Patch(
+                AccessTools.Method(typeof(SkillRecord), nameof(SkillRecord.GetLevel)),
+                transpiler: unclampTranspiler);
+            harmony.Patch(
+                AccessTools.Method(typeof(SkillRecord), nameof(SkillRecord.GetLevelForUI)),
+                transpiler: unclampTranspiler);
+            harmony.Patch(
+                AccessTools.PropertySetter(typeof(SkillRecord), nameof(SkillRecord.Level)),
+                transpiler: unclampTranspiler);
+            // Bills keep vanilla 0-20 semantics: their 0-20 range slider with the
+            // level re-clamped means "max 20" naturally reads as "20 and up".
+            harmony.Patch(
+                AccessTools.Method(typeof(Bill), nameof(Bill.PawnAllowedToStartAnew)),
+                transpiler: new HarmonyMethod(self, nameof(BillSkillCheck_Transpiler)));
+            harmony.Patch(
+                AccessTools.PropertyGetter(typeof(SkillRecord), nameof(SkillRecord.LevelDescriptor)),
+                postfix: new HarmonyMethod(self, nameof(LevelDescriptor_Postfix)));
+
             // -- UI --------------------------------------------------------------
             harmony.Patch(
                 AccessTools.Method(typeof(SkillUI), nameof(SkillUI.DrawSkill),
@@ -65,10 +86,8 @@ namespace PawnSkillsReimagined
         // XP funnel
         // --------------------------------------------------------------------
 
-        // Skill XP is redirected into the pawn's level track. The full learn-rate
-        // pipeline (passions, global learning factor, daily saturation) is applied
-        // first, so passionate skills level the pawn faster. Negative XP (skill
-        // decay) is discarded - skills never rust. Priority.Last so other mods'
+        // Skill XP is redirected into the pawn's level track. The full learn-rate pipeline (passions, global learning factor, daily saturation) is applied
+        // first, so passionate skills level the pawn faster. Negative XP (skill decay) is discarded - skills never rust. Priority.Last so other mods'
         // prefixes that modify xp run before we capture it.
         public static bool Learn_Prefix(SkillRecord __instance, ref float xp, bool direct, bool ignoreLearnRate)
         {
@@ -349,8 +368,7 @@ namespace PawnSkillsReimagined
             return SkillLevelUtility.EffectiveLevel(record);
         }
 
-        // Feed the quality roll the stretched level instead of the raw rank, so
-        // quality progression follows the same 0..maxSkillLevel journey as the
+        // Feed the quality roll the stretched level instead of the raw rank, so quality progression follows the same 0..maxSkillLevel journey as the
         // stats (rank 30 of 100 rolls like a vanilla level-7 crafter, not 20).
         public static IEnumerable<CodeInstruction> QualityLevel_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -393,6 +411,67 @@ namespace PawnSkillsReimagined
                 }
                 __result += 1;
                 chance -= 1f;
+            }
+        }
+
+        // --------------------------------------------------------------------
+        // Level unclamping
+        // --------------------------------------------------------------------
+
+        public static int MaxSkillLevelInt()
+        {
+            return Mathf.Max(20, PawnSkillsReimaginedMod.Settings.maxSkillLevel);
+        }
+
+        // Swap the 20 fed into Mathf.Clamp(value, 0, 20) for the configured max
+        // skill level. Applied to GetLevel, GetLevelForUI and the Level setter.
+        public static IEnumerable<CodeInstruction> LevelClamp_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var list = instructions.ToList();
+            var clampInt = AccessTools.Method(typeof(Mathf), nameof(Mathf.Clamp),
+                new[] { typeof(int), typeof(int), typeof(int) });
+            var maxLevel = AccessTools.Method(typeof(HarmonyPatches), nameof(MaxSkillLevelInt));
+            for (int i = 0; i < list.Count - 1; i++)
+            {
+                if (list[i].opcode == OpCodes.Ldc_I4_S && list[i].OperandIs((sbyte)20) &&
+                    list[i + 1].Calls(clampInt))
+                {
+                    list[i].opcode = OpCodes.Call;
+                    list[i].operand = maxLevel;
+                }
+            }
+            return list;
+        }
+
+        // Bills compare against a 0-20 range; feed them the level re-clamped to
+        // 20 so a rank-40 crafter still matches a max-20 range (vanilla behavior).
+        public static IEnumerable<CodeInstruction> BillSkillCheck_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var getLevel = AccessTools.PropertyGetter(typeof(SkillRecord), nameof(SkillRecord.Level));
+            var billLevel = AccessTools.Method(typeof(HarmonyPatches), nameof(BillCheckLevel));
+            foreach (CodeInstruction instruction in instructions)
+            {
+                if (instruction.Calls(getLevel))
+                {
+                    instruction.opcode = OpCodes.Call;
+                    instruction.operand = billLevel;
+                }
+                yield return instruction;
+            }
+        }
+
+        public static int BillCheckLevel(SkillRecord record)
+        {
+            return Mathf.Min(record.GetLevel(), 20);
+        }
+
+        // GetLevelForUI above 20 falls out of the vanilla descriptor switch as
+        // "Unknown"; reuse the top descriptor instead.
+        public static void LevelDescriptor_Postfix(SkillRecord __instance, ref string __result)
+        {
+            if (__result == "Unknown" && __instance.GetLevelForUI() > 20)
+            {
+                __result = "Skill20".Translate();
             }
         }
 
