@@ -23,6 +23,7 @@
 		<li>brrainz.harmony</li>
 		<li>vanillaexpanded.skills</li>
 		<li>sarg.alphaskills</li>
+		<li>ferny.characterdevelopment</li>
 	</loadAfter>
 	<description>Manually assign skills</description>
 </ModMetaData>
