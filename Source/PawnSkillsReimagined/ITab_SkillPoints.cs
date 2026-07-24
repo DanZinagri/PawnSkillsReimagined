@@ -183,8 +183,11 @@ namespace PawnSkillsReimagined
             }
             bool disabled = record.TotallyDisabled;
             pendingSkills.TryGetValue(record, out int pending);
-            int level = SkillLevelUtility.EffectiveLevel(record);
-            int shownLevel = level + pending;
+            // Base = bought/backstory ranks (what costs scale on). Aptitude =
+            // gene/trait offset, shown separately so the cost basis is clear.
+            int baseLevel = Mathf.Max(0, record.levelInt);
+            int aptitude = record.Aptitude;
+            int shownBase = baseLevel + pending;
             PassionDef passion = PointCosts.PassionOf(record);
 
             // Passion icon
@@ -198,9 +201,28 @@ namespace PawnSkillsReimagined
             Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(new Rect(32f, row.y, 128f, row.height), record.def.skillLabel.CapitalizeFirst());
 
-            GUI.color = pending > 0 ? PendingGreen : (disabled ? new Color(1f, 1f, 1f, 0.4f) : Color.white);
-            Widgets.Label(new Rect(164f, row.y, 76f, row.height),
-                disabled ? "-" : (pending > 0 ? level + " → " + shownLevel : level.ToString()));
+            Rect levelRect = new Rect(164f, row.y, 110f, row.height);
+            if (disabled)
+            {
+                GUI.color = new Color(1f, 1f, 1f, 0.4f);
+                Widgets.Label(levelRect, "-");
+            }
+            else
+            {
+                // Rich text so the aptitude offset stays visually distinct from
+                // the (green) pending change and never reads as a bought rank.
+                GUI.color = Color.white;
+                string basePart = pending > 0 ? baseLevel + " → " + shownBase : baseLevel.ToString();
+                string text = "<color=#" + ColorUtility.ToHtmlStringRGB(pending > 0 ? PendingGreen : Color.white) +
+                              ">" + basePart + "</color>";
+                if (aptitude != 0)
+                {
+                    Color aptColor = aptitude > 0 ? new Color(0.55f, 0.8f, 1f) : new Color(1f, 0.55f, 0.55f);
+                    text += " <color=#" + ColorUtility.ToHtmlStringRGB(aptColor) + ">(" +
+                            aptitude.ToStringWithSign() + ")</color>";
+                }
+                Widgets.Label(levelRect, text);
+            }
             GUI.color = Color.white;
             Text.Anchor = TextAnchor.UpperLeft;
 
@@ -222,7 +244,7 @@ namespace PawnSkillsReimagined
             // Cost of the next rank to queue, priced at the level after any
             // already-pending ranks (scaling can make it climb).
             int nextCost = PointCosts.CostAtLevel(record, Mathf.Max(0, record.levelInt) + pending);
-            bool canQueue = available >= nextCost && shownLevel < maxSkill;
+            bool canQueue = available >= nextCost && shownBase < maxSkill;
             Rect plusRect = new Rect(row.width - 68f, btnY, 64f, 24f);
             TooltipHandler.TipRegion(plusRect,
                 "Queue +1 rank for " + nextCost + " points (" + (passion?.label ?? "no passion") +
@@ -234,7 +256,7 @@ namespace PawnSkillsReimagined
                 {
                     pendingSkills.TryGetValue(record, out int cur);
                     int stepCost = PointCosts.CostAtLevel(record, Mathf.Max(0, record.levelInt) + cur);
-                    if (available < stepCost || level + cur >= maxSkill)
+                    if (available < stepCost || baseLevel + cur >= maxSkill)
                     {
                         break;
                     }
