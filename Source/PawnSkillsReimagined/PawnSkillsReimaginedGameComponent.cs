@@ -190,6 +190,10 @@ namespace PawnSkillsReimagined
             }
             record.levelInt++;
             For(pawn).spentPoints += cost;
+            // Skills raised via points bypass SkillRecord.Learn, so mods watching
+            // it for skill-increase rewards (Character Development) miss the event
+            // - re-emit it. No-ops when that mod isn't loaded.
+            CharacterDevelopmentCompat.NotifySkillIncreased(pawn, record.def, record.levelInt);
             return true;
         }
 

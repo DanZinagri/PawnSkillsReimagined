@@ -3,20 +3,24 @@
   "WorkspaceRootPath": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\harmonypatches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:harmonypatches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\characterdevelopmentcompat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:characterdevelopmentcompat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\pawnskillsreimaginedgamecomponent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:pawnskillsreimaginedgamecomponent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\itab_skillpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:itab_skillpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\pawnskillsreimaginedmod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:pawnskillsreimaginedmod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\harmonypatches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:harmonypatches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\itab_skillpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:itab_skillpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\skilllevelutility.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -34,11 +38,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
+              "Title": "CharacterDevelopmentCompat.cs",
+              "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\CharacterDevelopmentCompat.cs",
+              "RelativeDocumentMoniker": "CharacterDevelopmentCompat.cs",
+              "ToolTip": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\CharacterDevelopmentCompat.cs",
+              "RelativeToolTip": "CharacterDevelopmentCompat.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAgwAoAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-24T06:04:23.651Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "SkillLevelUtility.cs",
               "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\SkillLevelUtility.cs",
               "RelativeDocumentMoniker": "SkillLevelUtility.cs",
@@ -50,7 +67,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "PointCosts.cs",
               "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PointCosts.cs",
               "RelativeDocumentMoniker": "PointCosts.cs",
@@ -62,15 +79,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "PawnSkillsReimaginedMod.cs",
               "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimaginedMod.cs",
               "RelativeDocumentMoniker": "PawnSkillsReimaginedMod.cs",
               "ToolTip": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimaginedMod.cs",
               "RelativeToolTip": "PawnSkillsReimaginedMod.cs",
-              "ViewState": "AgIAACgAAAAAAAAAAAAAAD8AAABjAAAAAAAAAA==",
+              "ViewState": "AgIAACsAAAAAAAAAAAAAAEsAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-20T21:30:14.108Z"
+              "WhenOpened": "2026-07-20T21:30:14.108Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -82,11 +100,12 @@
               "RelativeToolTip": "PawnSkillsReimaginedGameComponent.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-20T21:30:13.514Z"
+              "WhenOpened": "2026-07-20T21:30:13.514Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "ITab_SkillPoints.cs",
               "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\ITab_SkillPoints.cs",
               "RelativeDocumentMoniker": "ITab_SkillPoints.cs",
@@ -98,7 +117,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "HarmonyPatches.cs",
               "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\HarmonyPatches.cs",
               "RelativeDocumentMoniker": "HarmonyPatches.cs",
@@ -106,8 +125,7 @@
               "RelativeToolTip": "HarmonyPatches.cs",
               "ViewState": "AgIAAJYBAAAAAAAAAAAgwKcBAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-20T21:09:55.599Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-20T21:09:55.599Z"
             }
           ]
         }

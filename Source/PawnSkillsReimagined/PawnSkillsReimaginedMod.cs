@@ -68,6 +68,13 @@ namespace PawnSkillsReimagined
             FloatRow(listing, "PSR_StartingXp".Translate(), ref Settings.startingXpMultiplier, ref bufStartingXp, 0f, 5f,
                 "PSR_StartingXp_Desc".Translate());
 
+            listing.Gap(4f);
+            Text.Font = GameFont.Tiny;
+            GUI.color = Color.gray;
+            listing.Label("PSR_CurveNote".Translate(PawnSkillsReimaginedGameComponent.MaxLevel));
+            GUI.color = Color.white;
+            Text.Font = GameFont.Small;
+
             Rect scaleRow = listing.GetRect(28f);
             TooltipHandler.TipRegion(scaleRow, "PSR_ScaleCost_Desc".Translate());
             Widgets.CheckboxLabeled(scaleRow, "PSR_ScaleCost".Translate(), ref Settings.scaleCostWithLevel);
@@ -77,12 +84,7 @@ namespace PawnSkillsReimagined
                     "PSR_ScaleInterval_Desc".Translate());
             }
 
-            listing.Gap(4f);
-            Text.Font = GameFont.Tiny;
-            GUI.color = Color.gray;
-            listing.Label("PSR_CurveNote".Translate(PawnSkillsReimaginedGameComponent.MaxLevel));
-            GUI.color = Color.white;
-            Text.Font = GameFont.Small;
+            
 
             listing.Gap(10f);
             Text.Font = GameFont.Medium;
