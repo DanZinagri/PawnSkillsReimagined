@@ -45,11 +45,25 @@ namespace PawnSkillsReimagined
             int total = 0;
             foreach (KeyValuePair<SkillRecord, int> kvp in pendingSkills)
             {
-                total += kvp.Value * PointCosts.CostFor(kvp.Key);
+                total += PendingSkillCost(kvp.Key, kvp.Value);
             }
             foreach (KeyValuePair<ExpertiseRecord, int> kvp in pendingExpertise)
             {
                 total += kvp.Value * PawnSkillsReimaginedMod.Settings.expertisePointCost;
+            }
+            return total;
+        }
+
+        // Sum the cost of the next `count` ranks from the skill's current level,
+        // walking the level up so cost scaling is priced exactly (each rank can
+        // cross an interval boundary and cost more than the last).
+        private static int PendingSkillCost(SkillRecord record, int count)
+        {
+            int total = 0;
+            int level = Mathf.Max(0, record.levelInt);
+            for (int i = 0; i < count; i++)
+            {
+                total += PointCosts.CostAtLevel(record, level + i);
             }
             return total;
         }
@@ -171,7 +185,6 @@ namespace PawnSkillsReimagined
             pendingSkills.TryGetValue(record, out int pending);
             int level = SkillLevelUtility.EffectiveLevel(record);
             int shownLevel = level + pending;
-            int cost = PointCosts.CostFor(record);
             PassionDef passion = PointCosts.PassionOf(record);
 
             // Passion icon
@@ -206,23 +219,27 @@ namespace PawnSkillsReimagined
                     pendingSkills.Remove(record);
                 }
             }
-            bool canQueue = available >= cost && shownLevel < maxSkill;
+            // Cost of the next rank to queue, priced at the level after any
+            // already-pending ranks (scaling can make it climb).
+            int nextCost = PointCosts.CostAtLevel(record, Mathf.Max(0, record.levelInt) + pending);
+            bool canQueue = available >= nextCost && shownLevel < maxSkill;
             Rect plusRect = new Rect(row.width - 68f, btnY, 64f, 24f);
             TooltipHandler.TipRegion(plusRect,
-                "Queue +1 rank for " + cost + " points (" + (passion?.label ?? "no passion") +
+                "Queue +1 rank for " + nextCost + " points (" + (passion?.label ?? "no passion") +
                 ").\nShift-click: +5 ranks.");
-            if (Widgets.ButtonText(plusRect, "+ (" + cost + ")", active: canQueue) && canQueue)
+            if (Widgets.ButtonText(plusRect, "+ (" + nextCost + ")", active: canQueue) && canQueue)
             {
                 int toQueue = Event.current.shift ? 5 : 1;
                 for (int i = 0; i < toQueue; i++)
                 {
                     pendingSkills.TryGetValue(record, out int cur);
-                    if (available < cost || level + cur >= maxSkill)
+                    int stepCost = PointCosts.CostAtLevel(record, Mathf.Max(0, record.levelInt) + cur);
+                    if (available < stepCost || level + cur >= maxSkill)
                     {
                         break;
                     }
                     pendingSkills[record] = cur + 1;
-                    available -= cost;
+                    available -= stepCost;
                 }
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }

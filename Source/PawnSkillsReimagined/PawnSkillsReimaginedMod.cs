@@ -19,6 +19,7 @@ namespace PawnSkillsReimagined
         private string bufConversion;
         private string bufRequirement;
         private string bufStartingXp;
+        private string bufScaleInterval;
         private readonly Dictionary<string, string> bufPassionCosts = new Dictionary<string, string>();
 
         private Vector2 settingsScroll;
@@ -41,7 +42,7 @@ namespace PawnSkillsReimagined
                     passionRows++;
                 }
             }
-            float viewHeight = 11 * 32f + passionRows * 34f + 130f;
+            float viewHeight = 13 * 32f + passionRows * 34f + 130f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -66,6 +67,15 @@ namespace PawnSkillsReimagined
                 "PSR_XpRequirement_Desc".Translate());
             FloatRow(listing, "PSR_StartingXp".Translate(), ref Settings.startingXpMultiplier, ref bufStartingXp, 0f, 5f,
                 "PSR_StartingXp_Desc".Translate());
+
+            Rect scaleRow = listing.GetRect(28f);
+            TooltipHandler.TipRegion(scaleRow, "PSR_ScaleCost_Desc".Translate());
+            Widgets.CheckboxLabeled(scaleRow, "PSR_ScaleCost".Translate(), ref Settings.scaleCostWithLevel);
+            if (Settings.scaleCostWithLevel)
+            {
+                IntRow(listing, "PSR_ScaleInterval".Translate(), ref Settings.scaleCostInterval, ref bufScaleInterval, 1, 50,
+                    "PSR_ScaleInterval_Desc".Translate());
+            }
 
             listing.Gap(4f);
             Text.Font = GameFont.Tiny;
@@ -273,6 +283,8 @@ namespace PawnSkillsReimagined
         public float xpConversionRate = 1f;                   // skill XP -> pawn level XP multiplier
         public float xpRequirementMultiplier = 1f;            // scales XP needed per level
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
+        public bool scaleCostWithLevel = true;                // rank cost rises with skill level
+        public int scaleCostInterval = 10;                    // +1 cost every N ranks
         public Dictionary<string, int> passionCosts = new Dictionary<string, int>();
 
         public override void ExposeData()
@@ -287,6 +299,8 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref xpConversionRate, "xpConversionRate", 1f);
             Scribe_Values.Look(ref xpRequirementMultiplier, "xpRequirementMultiplier", 1f);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);
+            Scribe_Values.Look(ref scaleCostWithLevel, "scaleCostWithLevel", true);
+            Scribe_Values.Look(ref scaleCostInterval, "scaleCostInterval", 10);
             Scribe_Collections.Look(ref passionCosts, "passionCosts", LookMode.Value, LookMode.Value);
             if (Scribe.mode == LoadSaveMode.PostLoadInit && passionCosts == null)
             {

@@ -503,7 +503,7 @@ namespace PawnSkillsReimagined
                         ". XP earned by this skill levels the pawn instead of the skill; higher passions earn faster.";
             if (passion != null)
             {
-                __result += "\nRaising this skill costs " + PointCosts.CostFor(passion) +
+                __result += "\nRaising this skill costs " + PointCosts.CostFor(sk) +
                             " points (" + passion.label + ").";
             }
         }

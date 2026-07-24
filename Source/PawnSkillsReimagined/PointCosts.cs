@@ -69,7 +69,23 @@ namespace PawnSkillsReimagined
 
         public static int CostFor(SkillRecord record)
         {
-            return CostFor(PassionOf(record));
+            return record == null ? FallbackCost : CostAtLevel(record, record.levelInt);
+        }
+
+        // Cost to raise a skill from a given level. The passion base cost rises
+        // by 1 every scaleCostInterval ranks (when scaling is enabled), so ranks
+        // get progressively more expensive - buying the 20th rank costs more
+        // than the 1st even at the same passion. Uses the raw bought level so
+        // gene aptitudes don't inflate the price.
+        public static int CostAtLevel(SkillRecord record, int level)
+        {
+            int cost = CostFor(PassionOf(record));
+            var settings = PawnSkillsReimaginedMod.Settings;
+            if (settings.scaleCostWithLevel && settings.scaleCostInterval > 0 && level > 0)
+            {
+                cost += level / settings.scaleCostInterval;
+            }
+            return cost;
         }
     }
 }

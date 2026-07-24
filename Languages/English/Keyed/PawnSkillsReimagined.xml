@@ -24,6 +24,10 @@
     <PSR_XpRequirement_Desc>Multiplies the XP needed for each level-up. 1 = the standard curve (100 x level^1.5).</PSR_XpRequirement_Desc>
     <PSR_StartingXp>Starting XP multiplier</PSR_StartingXp>
     <PSR_StartingXp_Desc>The random skill levels vanilla would have rolled for a new pawn (from age and life experience) are converted into starting character XP instead. World pawns spend the resulting points randomly, weighted toward their backstory skills; your starting colonists keep the points for you to spend. 0 disables starting XP.</PSR_StartingXp_Desc>
+    <PSR_ScaleCost>Scale rank cost with skill level</PSR_ScaleCost>
+    <PSR_ScaleCost_Desc>Higher skill ranks cost more points to raise, so progression isn't perfectly linear. The passion cost rises by 1 every few ranks (set by the interval below). Off = every rank of a skill costs the same flat passion price.</PSR_ScaleCost_Desc>
+    <PSR_ScaleInterval>Cost increase interval</PSR_ScaleInterval>
+    <PSR_ScaleInterval_Desc>Rank cost goes up by 1 point for every this-many levels of the skill. A passion costing 2 stays 2 through levels 1-9, becomes 3 at level 10, 4 at level 20, and so on.</PSR_ScaleInterval_Desc>
 
     <!-- Settings: passion cost section -->
     <PSR_PassionCostsHeader>Skill rank costs by passion</PSR_PassionCostsHeader>
