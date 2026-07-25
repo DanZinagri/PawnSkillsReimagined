@@ -233,9 +233,15 @@ namespace PawnSkillsReimagined
 
             // Minus reduces the pending queue; plus queues a rank at this cost.
             float btnY = row.y + 2f;
-            if (pending > 0 && Widgets.ButtonText(new Rect(row.width - 96f, btnY, 24f, 24f), "-"))
+            Rect minusRect = new Rect(row.width - 96f, btnY, 24f, 24f);
+            if (pending > 0)
             {
-                pendingSkills[record] = pending - 1;
+                TooltipHandler.TipRegion(minusRect, "Un-queue 1 rank.\nShift-click: up to 5.");
+            }
+            if (pending > 0 && Widgets.ButtonText(minusRect, "-"))
+            {
+                int toRemove = Event.current.shift ? Mathf.Min(5, pending) : 1;
+                pendingSkills[record] = pending - toRemove;
                 if (pendingSkills[record] <= 0)
                 {
                     pendingSkills.Remove(record);
