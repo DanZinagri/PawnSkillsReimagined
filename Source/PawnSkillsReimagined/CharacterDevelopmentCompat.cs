@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -76,6 +78,78 @@ namespace PawnSkillsReimagined
             catch (Exception e)
             {
                 Log.WarningOnce("[Pawn Skills Reimagined] Character Development skill-want notify failed: " + e.Message, 84421007);
+            }
+        }
+
+        // --------------------------------------------------------------------
+        // Reward cap lift (startup Harmony transpile)
+        // --------------------------------------------------------------------
+
+        // CD's RewardWorker_Skill (its "+1 to a skill" quirk reward) hardcodes 20
+        // as the ceiling in CanBestowOn ("Level >= 20") and its "Level < 20" LINQ
+        // predicates. Since we unclamped GetLevel, those compare the real level
+        // against 20 and wrongly exclude any skill 20+.
+        public static void PatchRewardCap(Harmony harmony)
+        {
+            if (!ModsConfig.IsActive("ferny.characterdevelopment"))
+            {
+                return;
+            }
+            try
+            {
+                Type rw = AccessTools.TypeByName("WantsAndQuirks.RewardWorker_Skill");
+                if (rw == null)
+                {
+                    Log.Warning("[Pawn Skills Reimagined] Character Development is active but RewardWorker_Skill " +
+                                "was not found; its skill reward will stay capped at 20.");
+                    return;
+                }
+                var lift = new HarmonyMethod(typeof(CharacterDevelopmentCompat), nameof(LiftSkillCap_Transpiler));
+                TryTranspile(harmony, AccessTools.Method(rw, "CanBestowOn"), lift);
+                TryTranspile(harmony, AccessTools.Method(rw, "OnAcquired"), lift);
+                // The "Level < 20" predicates are non-capturing lambdas emitted into
+                // a nested <>c class; patch those methods too.
+                foreach (Type nested in rw.GetNestedTypes(AccessTools.all))
+                {
+                    foreach (MethodInfo m in AccessTools.GetDeclaredMethods(nested))
+                    {
+                        if (m.Name.Contains("b__"))
+                        {
+                            TryTranspile(harmony, m, lift);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Warning("[Pawn Skills Reimagined] Failed to lift Character Development skill-reward cap: " + e);
+            }
+        }
+
+        private static void TryTranspile(Harmony harmony, MethodBase method, HarmonyMethod transpiler)
+        {
+            if (method != null)
+            {
+                harmony.Patch(method, transpiler: transpiler);
+            }
+        }
+
+        // Replace the constant 20 with our configured max skill level. Only applied
+        // to the tightly-scoped CD reward methods above, whose only literal 20s are
+        // skill-level caps.
+        public static IEnumerable<CodeInstruction> LiftSkillCap_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var maxLevel = AccessTools.Method(typeof(HarmonyPatches), nameof(HarmonyPatches.MaxSkillLevelInt));
+            foreach (CodeInstruction instruction in instructions)
+            {
+                if (instruction.operand != null &&
+                    (instruction.opcode == OpCodes.Ldc_I4_S || instruction.opcode == OpCodes.Ldc_I4) &&
+                    Convert.ToInt32(instruction.operand) == 20)
+                {
+                    instruction.opcode = OpCodes.Call;
+                    instruction.operand = maxLevel;
+                }
+                yield return instruction;
             }
         }
     }

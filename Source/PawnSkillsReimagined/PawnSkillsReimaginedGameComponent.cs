@@ -80,9 +80,21 @@ namespace PawnSkillsReimagined
             return p;
         }
 
+        // Side-effect-free read: returns the pawn's progress or null without
+        // creating an entry. Use for queries (API, display) so polling doesn't
+        // bloat the dictionary with entries for pawns that never earned XP.
+        public PawnProgress GetProgressOrNull(Pawn pawn)
+        {
+            return pawn != null && progress.TryGetValue(pawn, out PawnProgress p) ? p : null;
+        }
+
         public int AvailableFor(Pawn pawn)
         {
-            PawnProgress p = For(pawn);
+            PawnProgress p = GetProgressOrNull(pawn);
+            if (p == null)
+            {
+                return 0;
+            }
             return Mathf.Max(0, (p.level - 1) * PawnSkillsReimaginedMod.Settings.pointsPerLevel - p.spentPoints);
         }
 
@@ -140,6 +152,38 @@ namespace PawnSkillsReimagined
                 p.level++;
             }
             if (p.level >= maxLevel)
+            {
+                p.xp = 0f;
+            }
+        }
+
+        // Grant (or remove, if negative) whole levels directly. Silent, clamped
+        // to [1, MaxLevel]. Public API entry point for other mods.
+        public void AddLevels(Pawn pawn, int count)
+        {
+            if (pawn == null || count == 0)
+            {
+                return;
+            }
+            PawnProgress p = For(pawn);
+            p.level = Mathf.Clamp(p.level + count, 1, MaxLevel);
+            if (p.level >= MaxLevel)
+            {
+                p.xp = 0f;
+            }
+        }
+
+        // Set the pawn's level exactly, clamped to [1, MaxLevel]. Silent. Public
+        // API entry point for other mods.
+        public void SetLevel(Pawn pawn, int level)
+        {
+            if (pawn == null)
+            {
+                return;
+            }
+            PawnProgress p = For(pawn);
+            p.level = Mathf.Clamp(level, 1, MaxLevel);
+            if (p.level >= MaxLevel)
             {
                 p.xp = 0f;
             }

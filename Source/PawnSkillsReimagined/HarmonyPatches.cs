@@ -76,6 +76,8 @@ namespace PawnSkillsReimagined
                 AccessTools.Method(typeof(SkillUI), "GetSkillDescription"),
                 postfix: new HarmonyMethod(self, nameof(GetSkillDescription_Postfix)));
 
+            CharacterDevelopmentCompat.PatchRewardCap(harmony);
+
             InjectSkillPointsTab();
         }
 
