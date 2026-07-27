@@ -52,7 +52,7 @@
               "RelativeDocumentMoniker": "PawnSkillsReimaginedAPI.cs",
               "ToolTip": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimaginedAPI.cs",
               "RelativeToolTip": "PawnSkillsReimaginedAPI.cs",
-              "ViewState": "AgIAAD4AAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-07-26T22:34:00.508Z",
               "EditorCaption": ""
@@ -67,8 +67,7 @@
               "RelativeToolTip": "CharacterDevelopmentCompat.cs",
               "ViewState": "AgIAAE4AAAAAAAAAAAAowFoAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-24T06:04:23.651Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-24T06:04:23.651Z"
             },
             {
               "$type": "Document",
@@ -92,8 +91,7 @@
               "RelativeToolTip": "PointCosts.cs",
               "ViewState": "AgIAABsAAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-20T21:30:14.749Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-20T21:30:14.749Z"
             },
             {
               "$type": "Document",
@@ -117,8 +115,7 @@
               "RelativeToolTip": "PawnSkillsReimaginedGameComponent.cs",
               "ViewState": "AgIAAEQAAAAAAAAAAAAuwB0AAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-20T21:30:13.514Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-20T21:30:13.514Z"
             },
             {
               "$type": "Document",
@@ -142,8 +139,7 @@
               "RelativeToolTip": "HarmonyPatches.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAAAF0BAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-20T21:09:55.599Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-20T21:09:55.599Z"
             }
           ]
         }

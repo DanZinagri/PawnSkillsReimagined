@@ -189,6 +189,38 @@ namespace PawnSkillsReimagined
             }
         }
 
+        // Grant (delta > 0) or revoke (delta < 0) spendable skill points without
+        // touching the level. Points are derived as (level-1)*pointsPerLevel -
+        // spentPoints, so we move spentPoints the opposite way.
+        public void AddSkillPoints(Pawn pawn, int delta)
+        {
+            if (pawn == null || delta == 0)
+            {
+                return;
+            }
+            For(pawn).spentPoints -= delta;
+        }
+
+        // Change the level by count while keeping available points unchanged: the
+        // level moves but the points those levels would grant are offset out, so
+        // this raises/lowers the level "for free". Clamped to [1, MaxLevel].
+        public void AddLevelsNoPoints(Pawn pawn, int count)
+        {
+            if (pawn == null || count == 0)
+            {
+                return;
+            }
+            PawnProgress p = For(pawn);
+            int before = p.level;
+            p.level = Mathf.Clamp(p.level + count, 1, MaxLevel);
+            int applied = p.level - before;
+            p.spentPoints += applied * PawnSkillsReimaginedMod.Settings.pointsPerLevel;
+            if (p.level >= MaxLevel)
+            {
+                p.xp = 0f;
+            }
+        }
+
         // Spend all affordable points randomly across usable skills, weighted
         // toward existing (backstory) ranks so builds follow the pawn's story.
         // Passion costs apply, so cheap passionate skills naturally soak up more
