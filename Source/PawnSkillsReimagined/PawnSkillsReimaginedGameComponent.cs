@@ -33,7 +33,7 @@ namespace PawnSkillsReimagined
 
         private Dictionary<Pawn, PawnProgress> progress = new Dictionary<Pawn, PawnProgress>();
 
-        private List<Pawn> tmpPawns;
+        private List<string> tmpPawnIds;
         private List<PawnProgress> tmpProgress;
 
         // Cached statically: Instance is read from the Learn hot path (every work
@@ -296,15 +296,73 @@ namespace PawnSkillsReimagined
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Collections.Look(ref progress, "PSR_progress",
-                LookMode.Reference, LookMode.Deep, ref tmpPawns, ref tmpProgress);
+
+            // Pawn keys are scribed as their unique load-ID strings under a
+            // "PSR_progress" node, laid out exactly like Scribe_Collections.Look's
+            // dictionary format (parallel "keys"/"values" lists), so old saves
+            // load unchanged. Storing the keys as plain strings rather than
+            // references means loading a key for a pawn that no longer exists
+            // never invokes the cross-ref resolver and so never logs its "Could
+            // not resolve reference" warning; we match the IDs back to pawns
+            // ourselves in PostLoadInit and silently drop any that are gone.
+            if (Scribe.mode == LoadSaveMode.Saving)
+            {
+                tmpPawnIds = new List<string>();
+                tmpProgress = new List<PawnProgress>();
+                foreach (KeyValuePair<Pawn, PawnProgress> kvp in progress)
+                {
+                    if (kvp.Key == null || kvp.Key.Destroyed || kvp.Value == null)
+                    {
+                        continue;
+                    }
+                    tmpPawnIds.Add(kvp.Key.GetUniqueLoadID());
+                    tmpProgress.Add(kvp.Value);
+                }
+            }
+
+            if (Scribe.EnterNode("PSR_progress"))
+            {
+                try
+                {
+                    Scribe_Collections.Look(ref tmpPawnIds, "keys", LookMode.Value);
+                    Scribe_Collections.Look(ref tmpProgress, "values", LookMode.Deep);
+                }
+                finally
+                {
+                    Scribe.ExitNode();
+                }
+            }
+
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
-                if (progress == null)
+                progress = new Dictionary<Pawn, PawnProgress>();
+                if (tmpPawnIds != null && tmpProgress != null)
                 {
-                    progress = new Dictionary<Pawn, PawnProgress>();
+                    // One pass over every loaded pawn builds the ID lookup; entries
+                    // whose pawn isn't present (died and cleaned out, compressed
+                    // away, left with a mod removed) simply find no match.
+                    Dictionary<string, Pawn> byId = new Dictionary<string, Pawn>();
+                    foreach (Pawn p in PawnsFinder.All_AliveOrDead)
+                    {
+                        if (p != null)
+                        {
+                            byId[p.GetUniqueLoadID()] = p;
+                        }
+                    }
+                    int count = Mathf.Min(tmpPawnIds.Count, tmpProgress.Count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        PawnProgress prog = tmpProgress[i];
+                        if (prog != null && tmpPawnIds[i] != null &&
+                            byId.TryGetValue(tmpPawnIds[i], out Pawn pawn) &&
+                            pawn != null && !pawn.Destroyed)
+                        {
+                            progress[pawn] = prog;
+                        }
+                    }
                 }
-                progress.RemoveAll(kvp => kvp.Key == null || kvp.Key.Destroyed || kvp.Value == null);
+                tmpPawnIds = null;
+                tmpProgress = null;
                 lastPawn = null;
                 lastProgress = null;
             }
