@@ -33,7 +33,7 @@ namespace PawnSkillsReimagined
 
         private Dictionary<Pawn, PawnProgress> progress = new Dictionary<Pawn, PawnProgress>();
 
-        private List<string> tmpPawnIds;
+        private List<Pawn> tmpPawns;
         private List<PawnProgress> tmpProgress;
 
         // Cached statically: Instance is read from the Learn hot path (every work
@@ -297,34 +297,32 @@ namespace PawnSkillsReimagined
         {
             base.ExposeData();
 
-            // Pawn keys are scribed as their unique load-ID strings under a
-            // "PSR_progress" node, laid out exactly like Scribe_Collections.Look's
-            // dictionary format (parallel "keys"/"values" lists), so old saves
-            // load unchanged. Storing the keys as plain strings rather than
-            // references means loading a key for a pawn that no longer exists
-            // never invokes the cross-ref resolver and so never logs its "Could
-            // not resolve reference" warning; we match the IDs back to pawns
-            // ourselves in PostLoadInit and silently drop any that are gone.
+            // Scribed as two parallel lists ("keys" pawn references + "values"
+            // deep progress) under a "PSR_progress" node -- the exact layout
+            // Scribe_Collections.Look uses for a dictionary, so old saves load
+            // unchanged. We zip them back together ourselves in PostLoadInit
+            // rather than letting the dictionary builder do it, so a reference
+            // that fails to resolve is skipped quietly instead of logging a red
+            // "Null key" error. And we prune stale pawns at save time (below) so
+            // an unresolvable reference is never written -- that is what stops the
+            // yellow "Could not resolve reference" warning at its source. Keys use
+            // LookMode.Reference (not raw load-IDs) because references resolve
+            // through the cross-ref directory during load; a manual load-ID scan
+            // would run in PostLoadInit before maps have spawned their pawns and
+            // find nothing, wiping every pawn's level.
             if (Scribe.mode == LoadSaveMode.Saving)
             {
-                tmpPawnIds = new List<string>();
-                tmpProgress = new List<PawnProgress>();
-                foreach (KeyValuePair<Pawn, PawnProgress> kvp in progress)
-                {
-                    if (kvp.Key == null || kvp.Key.Destroyed || kvp.Value == null)
-                    {
-                        continue;
-                    }
-                    tmpPawnIds.Add(kvp.Key.GetUniqueLoadID());
-                    tmpProgress.Add(kvp.Value);
-                }
+                progress.RemoveAll(kvp => kvp.Key == null || kvp.Key.Destroyed ||
+                                          kvp.Key.Discarded || kvp.Value == null);
+                tmpPawns = progress.Keys.ToList();
+                tmpProgress = progress.Values.ToList();
             }
 
             if (Scribe.EnterNode("PSR_progress"))
             {
                 try
                 {
-                    Scribe_Collections.Look(ref tmpPawnIds, "keys", LookMode.Value);
+                    Scribe_Collections.Look(ref tmpPawns, "keys", LookMode.Reference);
                     Scribe_Collections.Look(ref tmpProgress, "values", LookMode.Deep);
                 }
                 finally
@@ -336,32 +334,21 @@ namespace PawnSkillsReimagined
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 progress = new Dictionary<Pawn, PawnProgress>();
-                if (tmpPawnIds != null && tmpProgress != null)
+                if (tmpPawns != null && tmpProgress != null)
                 {
-                    // One pass over every loaded pawn builds the ID lookup; entries
-                    // whose pawn isn't present (died and cleaned out, compressed
-                    // away, left with a mod removed) simply find no match.
-                    Dictionary<string, Pawn> byId = new Dictionary<string, Pawn>();
-                    foreach (Pawn p in PawnsFinder.All_AliveOrDead)
-                    {
-                        if (p != null)
-                        {
-                            byId[p.GetUniqueLoadID()] = p;
-                        }
-                    }
-                    int count = Mathf.Min(tmpPawnIds.Count, tmpProgress.Count);
+                    int count = Mathf.Min(tmpPawns.Count, tmpProgress.Count);
                     for (int i = 0; i < count; i++)
                     {
+                        Pawn pawn = tmpPawns[i];
                         PawnProgress prog = tmpProgress[i];
-                        if (prog != null && tmpPawnIds[i] != null &&
-                            byId.TryGetValue(tmpPawnIds[i], out Pawn pawn) &&
-                            pawn != null && !pawn.Destroyed)
+                        // Skip references that failed to resolve (pawn gone).
+                        if (pawn != null && !pawn.Destroyed && prog != null)
                         {
                             progress[pawn] = prog;
                         }
                     }
                 }
-                tmpPawnIds = null;
+                tmpPawns = null;
                 tmpProgress = null;
                 lastPawn = null;
                 lastProgress = null;
