@@ -16,6 +16,7 @@ namespace PawnSkillsReimagined
         private string bufMaxChar;
         private string bufPointsPerLevel;
         private string bufExpertiseCost;
+        private string bufExpertiseAcquire;
         private string bufConversion;
         private string bufRequirement;
         private string bufStartingXp;
@@ -42,7 +43,7 @@ namespace PawnSkillsReimagined
                     passionRows++;
                 }
             }
-            float viewHeight = 13 * 32f + passionRows * 34f + 130f;
+            float viewHeight = 14 * 32f + passionRows * 34f + 130f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -57,6 +58,8 @@ namespace PawnSkillsReimagined
                 "PSR_PointsPerLevel_Desc".Translate());
             IntRow(listing, "PSR_ExpertiseCost".Translate(), ref Settings.expertisePointCost, ref bufExpertiseCost, 1, 20,
                 "PSR_ExpertiseCost_Desc".Translate());
+            IntRow(listing, "PSR_ExpertiseUnlockLevel".Translate(), ref Settings.expertiseAcquireLevel, ref bufExpertiseAcquire,
+                0, Mathf.Max(20, Settings.maxSkillLevel), "PSR_ExpertiseUnlockLevel_Desc".Translate());
             FloatRow(listing, "PSR_TopEndTempering".Translate(), ref Settings.topEndRetention, ref bufRetention, 0.5f, 0.99f,
                 "PSR_TopEndTempering_Desc".Translate());
             PercentRow(listing, "PSR_QualityBump".Translate(), ref Settings.overCapQualityChancePerLevel, ref bufQuality, 0f, 0.05f,
@@ -280,6 +283,7 @@ namespace PawnSkillsReimagined
         public int maxCharacterLevel = 999;                   // pawn level cap, separate from skills
         public int pointsPerLevel = 5;                        // points granted per character level
         public int expertisePointCost = 5;                    // cost per VSE expertise level
+        public int expertiseAcquireLevel = 0;                 // override for VSE's skill level to unlock an expertise; 0 = use VSE's own setting
         public float topEndRetention = 0.9f;                 // temper for the beyond-vanilla headroom
         public float overCapQualityChancePerLevel = 0.0025f;  // quality bump chance per bonus vanilla-level
         public float xpConversionRate = 1f;                   // skill XP -> pawn level XP multiplier
@@ -296,6 +300,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref maxCharacterLevel, "maxCharacterLevel", 999);
             Scribe_Values.Look(ref pointsPerLevel, "pointsPerLevel", 5);
             Scribe_Values.Look(ref expertisePointCost, "expertisePointCost", 5);
+            Scribe_Values.Look(ref expertiseAcquireLevel, "expertiseAcquireLevel", 0);
             Scribe_Values.Look(ref topEndRetention, "topEndRetention", 0.9f);
             Scribe_Values.Look(ref overCapQualityChancePerLevel, "overCapQualityChancePerLevel", 0.0025f);
             Scribe_Values.Look(ref xpConversionRate, "xpConversionRate", 1f);

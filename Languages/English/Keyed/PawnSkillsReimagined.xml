@@ -14,6 +14,8 @@
     <PSR_PointsPerLevel_Desc>Points granted per character level-up. Spent on skill ranks at the passion-based costs below.</PSR_PointsPerLevel_Desc>
     <PSR_ExpertiseCost>Expertise point cost</PSR_ExpertiseCost>
     <PSR_ExpertiseCost_Desc>Point cost per level of a Vanilla Skills Expanded expertise (capped at 20 levels).</PSR_ExpertiseCost_Desc>
+    <PSR_ExpertiseUnlockLevel>Expertise unlock level</PSR_ExpertiseUnlockLevel>
+    <PSR_ExpertiseUnlockLevel_Desc>Minimum skill level a pawn needs before an expertise in that skill can be selected. Overrides Vanilla Skills Expanded's own limit (which stops at 20) so the requirement can scale with the raised skill cap. Set to 0 to leave VSE's own setting in charge.</PSR_ExpertiseUnlockLevel_Desc>
     <PSR_TopEndTempering>Chance stat tempering</PSR_TopEndTempering>
     <PSR_TopEndTempering_Desc>Limits how far outcome chances scale at high skill - surgery success, taming, construct success and similar - so they can't spiral toward 100%. Lower values temper harder. Work speeds and yields scale freely and ignore this, as do curve-bounded stats like melee, shooting and dodge.</PSR_TopEndTempering_Desc>
     <PSR_QualityBump>Quality bump chance</PSR_QualityBump>

@@ -77,6 +77,7 @@ namespace PawnSkillsReimagined
                 postfix: new HarmonyMethod(self, nameof(GetSkillDescription_Postfix)));
 
             CharacterDevelopmentCompat.PatchRewardCap(harmony);
+            ExpertiseUnlockCompat.Patch(harmony);
 
             InjectSkillPointsTab();
         }
