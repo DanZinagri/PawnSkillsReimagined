@@ -43,8 +43,7 @@ namespace PawnSkillsReimagined
             harmony.Patch(
                 AccessTools.Method(typeof(QualityUtility), nameof(QualityUtility.GenerateQualityCreatedByPawn),
                     new[] { typeof(Pawn), typeof(SkillDef), typeof(bool) }),
-                postfix: new HarmonyMethod(self, nameof(Quality_Postfix)),
-                transpiler: new HarmonyMethod(self, nameof(QualityLevel_Transpiler)));
+                prefix: new HarmonyMethod(self, nameof(Quality_Prefix)));
 
             // GetLevel/GetLevelForUI/the Level setter clamp to 0-20; raising that clamp to maxSkillLevel makes every third-party skill UI (RimHUD,
             // Modern Bio tab, character editors) show real ranks with no per-mod patches.
@@ -349,50 +348,87 @@ namespace PawnSkillsReimagined
             return false;
         }
 
-        // Feed the quality roll the stretched level instead of the raw rank, so quality progression follows the same 0..maxSkillLevel journey as the
-        // stats (rank 30 of 100 rolls like a vanilla level-7 crafter, not 20).
-        public static IEnumerable<CodeInstruction> QualityLevel_Transpiler(IEnumerable<CodeInstruction> instructions)
+        // replace the game's base quality detminer with our own nonsense so pawns aren't at full power at 20 anymore.
+        private const float QualityPeakCenter = 4.2f;      // vanilla's level-20 gaussian center
+        private const float QualityMaxCenter = 5.4f;       // center at a fully maxed skill
+        private const float QualityBaseCenter = 0.7f;      // vanilla's level-0 center
+        private const float QualityEarlyExponent = 0.42f;  // < 1 -> fast early, decelerating toward the peak
+        private const float QualityLegendaryCenter = 4.6f; // Legendary unlocks once the center passes this (just past vanilla's peak)
+
+        public static bool Quality_Prefix(ref QualityCategory __result, Pawn pawn, SkillDef relevantSkill,
+            bool consumeInspiration)
         {
-            var getLevel = AccessTools.PropertyGetter(typeof(SkillRecord), nameof(SkillRecord.Level));
-            var scaledLevel = AccessTools.Method(typeof(HarmonyPatches), nameof(ScaledQualityLevel));
-            foreach (CodeInstruction instruction in instructions)
+            // Mechanoids use a fixed low skill and never level; leave them on the
+            // vanilla path. Same for anything without our skill tracking.
+            if (pawn == null || pawn.RaceProps.IsMechanoid || pawn.skills == null)
             {
-                if (instruction.Calls(getLevel))
-                {
-                    instruction.opcode = OpCodes.Call;
-                    instruction.operand = scaledLevel;
-                }
-                yield return instruction;
+                return true;
             }
+            SkillRecord record = pawn.skills.GetSkill(relevantSkill);
+            if (record == null)
+            {
+                return true;
+            }
+
+            bool inspired = consumeInspiration && pawn.InspirationDef == InspirationDefOf.Inspired_Creativity;
+            QualityCategory quality = RollQuality(SkillLevelUtility.EffectiveLevel(record), inspired);
+
+            // Ideology production-quality role offset (mirrors vanilla).
+            if (ModsConfig.IdeologyActive && pawn.Ideo != null)
+            {
+                Precept_Role role = pawn.Ideo.GetRole(pawn);
+                RoleEffect eff = role?.def?.roleEffects?.FirstOrDefault(e => e is RoleEffect_ProductionQualityOffset);
+                if (eff != null)
+                {
+                    quality = AddQuality(quality, ((RoleEffect_ProductionQualityOffset)eff).offset);
+                }
+            }
+
+            if (inspired)
+            {
+                pawn.mindState.inspirationHandler.EndInspiration(InspirationDefOf.Inspired_Creativity);
+            }
+            __result = quality;
+            return false;
         }
 
-        public static int ScaledQualityLevel(SkillRecord record)
+        public static QualityCategory RollQuality(int rank, bool inspired)
         {
-            float vLevel = SkillLevelUtility.StretchedVanillaLevel(SkillLevelUtility.EffectiveLevel(record));
-            return Mathf.Clamp(Mathf.RoundToInt(vLevel), 0, 20);
+            float t = Mathf.Clamp01(rank / SkillLevelUtility.MaxSkillLevelFloat());
+            float center = QualityCenter(t);
+            int cap = center >= QualityLegendaryCenter ? 6 : 5;   // Masterwork until we clear vanilla's peak
+
+            int value = Mathf.Clamp((int)Rand.GaussianAsymmetric(center, 0.6f, 0.8f), 0, cap);
+            // Vanilla's Masterwork "second chance" reroll, kept for feel; with the
+            // lifted cap it becomes the path into Legendary at the highest ranks.
+            if (value == 5 && Rand.Value < 0.5f)
+            {
+                value = Mathf.Clamp((int)Rand.GaussianAsymmetric(center, 0.6f, 0.95f), 0, cap);
+            }
+
+            QualityCategory quality = (QualityCategory)value;
+            return inspired ? AddQuality(quality, 2) : quality;
         }
 
-        // Once the stretched level passes vanilla's 20, each bonus vanilla-level
-        // adds a small chance to bump quality one step.
-        public static void Quality_Postfix(ref QualityCategory __result, Pawn pawn, SkillDef relevantSkill)
+        private static float QualityCenter(float t)
         {
-            float chancePerLevel = PawnSkillsReimaginedMod.Settings.overCapQualityChancePerLevel;
-            if (chancePerLevel <= 0f || pawn.RaceProps.IsMechanoid || pawn.skills == null)
+            // Fraction of the skill cap at which quality reaches vanilla's peak,
+            // from the setting (e.g. level 85 of a 100 cap -> 0.85; set to 20 for
+            // near-vanilla timing). Clamped so it stays a valid sub-1 fraction.
+            float peak = Mathf.Clamp(
+                PawnSkillsReimaginedMod.Settings.qualityVanillaCapLevel / SkillLevelUtility.MaxSkillLevelFloat(),
+                0.05f, 1f);
+            if (t <= peak)
             {
-                return;
+                return QualityBaseCenter + (QualityPeakCenter - QualityBaseCenter) *
+                    Mathf.Pow(t / peak, QualityEarlyExponent);
             }
-            float vLevel = SkillLevelUtility.StretchedVanillaLevel(
-                SkillLevelUtility.EffectiveLevel(pawn.skills.GetSkill(relevantSkill)));
-            float chance = Mathf.Max(0f, vLevel - SkillLevelUtility.VanillaTop) * chancePerLevel;
-            while (chance > 0f && __result < QualityCategory.Legendary)
-            {
-                if (!Rand.Chance(Mathf.Min(chance, 1f)))
-                {
-                    break;
-                }
-                __result += 1;
-                chance -= 1f;
-            }
+            return QualityPeakCenter + (QualityMaxCenter - QualityPeakCenter) * (t - peak) / (1f - peak);
+        }
+
+        private static QualityCategory AddQuality(QualityCategory quality, int levels)
+        {
+            return (QualityCategory)Mathf.Clamp((int)quality + levels, 0, (int)QualityCategory.Legendary);
         }
 
         // --------------------------------------------------------------------

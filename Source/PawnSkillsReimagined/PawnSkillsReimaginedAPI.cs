@@ -20,7 +20,7 @@ namespace PawnSkillsReimagined
         // The configured character-level ceiling (maxCharacterLevel setting).
         public static int MaxLevel => PawnSkillsReimaginedGameComponent.MaxLevel;
 
-        // ---- Reads (side-effect-free) --------------------------------------
+        // ---- Reads --------------------------------------
 
         // Character level. Untracked pawns report the base level of 1.
         public static int GetLevel(Pawn pawn)
