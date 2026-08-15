@@ -12,8 +12,10 @@
     <PSR_MaxCharacterLevel_Desc>The pawn level cap. Tracked separately from skills; with variable point costs this leaves leeway and rewards passion investment.</PSR_MaxCharacterLevel_Desc>
     <PSR_PointsPerLevel>Skill points per level</PSR_PointsPerLevel>
     <PSR_PointsPerLevel_Desc>Points granted per character level-up. Spent on skill ranks at the passion-based costs below.</PSR_PointsPerLevel_Desc>
-    <PSR_ExpertiseCost>Expertise point cost</PSR_ExpertiseCost>
-    <PSR_ExpertiseCost_Desc>Point cost per level of a Vanilla Skills Expanded expertise (capped at 20 levels).</PSR_ExpertiseCost_Desc>
+    <PSR_ExpertiseSlotInterval>Levels per expertise slot</PSR_ExpertiseSlotInterval>
+    <PSR_ExpertiseSlotInterval_Desc>Character levels needed for each additional expertise a pawn may hold. A pawn can hold 1 expertise plus one more per this many levels (e.g. at 50, a level-100 pawn can hold 3). Overrides Vanilla Skills Expanded's single global limit. Multiple expertise on the same skill are allowed.</PSR_ExpertiseSlotInterval_Desc>
+    <PSR_ExpertisePointInterval>Levels per expertise point</PSR_ExpertisePointInterval>
+    <PSR_ExpertisePointInterval_Desc>Character levels between expertise-point grants. Each point raises one expertise by one level (max level 20). Points are banked as you level up; use dev mode to adjust a pawn's points if needed.</PSR_ExpertisePointInterval_Desc>
     <PSR_ExpertiseUnlockLevel>Expertise unlock level</PSR_ExpertiseUnlockLevel>
     <PSR_ExpertiseUnlockLevel_Desc>Minimum skill level a pawn needs before an expertise in that skill can be selected. Overrides Vanilla Skills Expanded's own limit (which stops at 20) so the requirement can scale with the raised skill cap. Set to 0 to leave VSE's own setting in charge.</PSR_ExpertiseUnlockLevel_Desc>
     <PSR_TopEndTempering>Chance stat tempering</PSR_TopEndTempering>

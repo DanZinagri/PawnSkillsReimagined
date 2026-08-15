@@ -40,16 +40,24 @@ namespace PawnSkillsReimagined
             }
         }
 
-        private int PendingCost()
+        // Pending skill-rank cost, in skill points.
+        private int PendingSkillTotal()
         {
             int total = 0;
             foreach (KeyValuePair<SkillRecord, int> kvp in pendingSkills)
             {
                 total += PendingSkillCost(kvp.Key, kvp.Value);
             }
+            return total;
+        }
+
+        // Pending expertise levels, in expertise points (1 point per level).
+        private int PendingExpertiseTotal()
+        {
+            int total = 0;
             foreach (KeyValuePair<ExpertiseRecord, int> kvp in pendingExpertise)
             {
-                total += kvp.Value * PawnSkillsReimaginedMod.Settings.expertisePointCost;
+                total += kvp.Value;
             }
             return total;
         }
@@ -87,7 +95,8 @@ namespace PawnSkillsReimagined
             PawnProgress p = comp.For(pawn);
             int maxLevel = PawnSkillsReimaginedGameComponent.MaxLevel;
             int maxSkill = PawnSkillsReimaginedMod.Settings.maxSkillLevel;
-            int available = comp.AvailableFor(pawn) - PendingCost();
+            int available = comp.AvailableFor(pawn) - PendingSkillTotal();
+            int availableExpertise = comp.AvailableExpertisePoints(pawn) - PendingExpertiseTotal();
             bool canSpend = (pawn.Faction == Faction.OfPlayerSilentFail || pawn.IsPrisonerOfColony) && !pawn.Dead;
 
             // Header: level + XP bar + points
@@ -109,8 +118,11 @@ namespace PawnSkillsReimagined
             }
 
             GUI.color = available > 0 ? Gold : Color.gray;
-            Widgets.Label(new Rect(rect.x, rect.y + 50f, rect.width, 22f),
+            Widgets.Label(new Rect(rect.x, rect.y + 50f, rect.width * 0.5f, 22f),
                 "Skill points: " + available);
+            GUI.color = availableExpertise > 0 ? Gold : Color.gray;
+            Widgets.Label(new Rect(rect.x + rect.width * 0.5f, rect.y + 50f, rect.width * 0.5f, 22f),
+                "Expertise points: " + availableExpertise);
             GUI.color = Color.white;
 
             // Skill + expertise list
@@ -135,14 +147,13 @@ namespace PawnSkillsReimagined
                 GUI.color = Gold;
                 Text.Anchor = TextAnchor.MiddleLeft;
                 Widgets.Label(new Rect(4f, y, viewRect.width, RowHeight),
-                    "Expertise (max " + PawnSkillsReimaginedGameComponent.ExpertiseCap +
-                    ", " + PawnSkillsReimaginedMod.Settings.expertisePointCost + " pts each)");
+                    "Expertise (max " + PawnSkillsReimaginedGameComponent.ExpertiseCap + ", 1 pt each)");
                 Text.Anchor = TextAnchor.UpperLeft;
                 GUI.color = Color.white;
                 y += RowHeight;
                 foreach (ExpertiseRecord record in expertise)
                 {
-                    DrawExpertiseRow(new Rect(0f, y, viewRect.width, RowHeight), record, canSpend, ref available);
+                    DrawExpertiseRow(new Rect(0f, y, viewRect.width, RowHeight), record, canSpend, ref availableExpertise);
                     y += RowHeight;
                 }
             }
@@ -273,7 +284,7 @@ namespace PawnSkillsReimagined
             }
         }
 
-        private void DrawExpertiseRow(Rect row, ExpertiseRecord record, bool canSpend, ref int available)
+        private void DrawExpertiseRow(Rect row, ExpertiseRecord record, bool canSpend, ref int availableExpertise)
         {
             if (Mouse.IsOver(row))
             {
@@ -282,7 +293,6 @@ namespace PawnSkillsReimagined
             pendingExpertise.TryGetValue(record, out int pending);
             int shownLevel = record.Level + pending;
             bool maxed = shownLevel >= PawnSkillsReimaginedGameComponent.ExpertiseCap;
-            int cost = PawnSkillsReimaginedMod.Settings.expertisePointCost;
 
             Text.Anchor = TextAnchor.MiddleLeft;
             Widgets.Label(new Rect(4f, row.y, 156f, row.height), record.def.LabelCap);
@@ -305,11 +315,12 @@ namespace PawnSkillsReimagined
                     pendingExpertise.Remove(record);
                 }
             }
-            bool canQueue = available >= cost && !maxed;
-            if (Widgets.ButtonText(new Rect(row.width - 68f, btnY, 64f, 24f), "+ (" + cost + ")", active: canQueue) && canQueue)
+            // One expertise point raises one expertise level.
+            bool canQueue = availableExpertise >= 1 && !maxed;
+            if (Widgets.ButtonText(new Rect(row.width - 68f, btnY, 64f, 24f), "+ (1)", active: canQueue) && canQueue)
             {
                 pendingExpertise[record] = pending + 1;
-                available -= cost;
+                availableExpertise -= 1;
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
         }

@@ -15,7 +15,8 @@ namespace PawnSkillsReimagined
         private string bufMaxSkill;
         private string bufMaxChar;
         private string bufPointsPerLevel;
-        private string bufExpertiseCost;
+        private string bufExpertiseSlot;
+        private string bufExpertisePoint;
         private string bufExpertiseAcquire;
         private string bufConversion;
         private string bufRequirement;
@@ -43,7 +44,7 @@ namespace PawnSkillsReimagined
                     passionRows++;
                 }
             }
-            float viewHeight = 14 * 32f + passionRows * 34f + 130f;
+            float viewHeight = 15 * 32f + passionRows * 34f + 130f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -56,8 +57,10 @@ namespace PawnSkillsReimagined
                 "PSR_MaxCharacterLevel_Desc".Translate());
             IntRow(listing, "PSR_PointsPerLevel".Translate(), ref Settings.pointsPerLevel, ref bufPointsPerLevel, 1, 20,
                 "PSR_PointsPerLevel_Desc".Translate());
-            IntRow(listing, "PSR_ExpertiseCost".Translate(), ref Settings.expertisePointCost, ref bufExpertiseCost, 1, 20,
-                "PSR_ExpertiseCost_Desc".Translate());
+            IntRow(listing, "PSR_ExpertiseSlotInterval".Translate(), ref Settings.expertiseSlotInterval, ref bufExpertiseSlot, 5, 200,
+                "PSR_ExpertiseSlotInterval_Desc".Translate());
+            IntRow(listing, "PSR_ExpertisePointInterval".Translate(), ref Settings.expertisePointInterval, ref bufExpertisePoint, 1, 100,
+                "PSR_ExpertisePointInterval_Desc".Translate());
             IntRow(listing, "PSR_ExpertiseUnlockLevel".Translate(), ref Settings.expertiseAcquireLevel, ref bufExpertiseAcquire,
                 0, Mathf.Max(20, Settings.maxSkillLevel), "PSR_ExpertiseUnlockLevel_Desc".Translate());
             FloatRow(listing, "PSR_TopEndTempering".Translate(), ref Settings.topEndRetention, ref bufRetention, 0.5f, 0.99f,
@@ -282,7 +285,8 @@ namespace PawnSkillsReimagined
         public int maxSkillLevel = 100;                       // hard cap on skill ranks; stat curve spans this range
         public int maxCharacterLevel = 999;                   // pawn level cap, separate from skills
         public int pointsPerLevel = 5;                        // points granted per character level
-        public int expertisePointCost = 5;                    // cost per VSE expertise level
+        public int expertiseSlotInterval = 50;                // character levels per +1 to a pawn's max expertise count
+        public int expertisePointInterval = 5;                // character levels per +1 expertise point
         public int expertiseAcquireLevel = 0;                 // override for VSE's skill level to unlock an expertise; 0 = use VSE's own setting
         public float topEndRetention = 0.9f;                 // temper for the beyond-vanilla headroom
         public int qualityVanillaCapLevel = 80;              // skill level where crafting quality reaches vanilla's level-20 ceiling
@@ -299,7 +303,8 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref maxSkillLevel, "maxSkillLevel", 100);
             Scribe_Values.Look(ref maxCharacterLevel, "maxCharacterLevel", 999);
             Scribe_Values.Look(ref pointsPerLevel, "pointsPerLevel", 5);
-            Scribe_Values.Look(ref expertisePointCost, "expertisePointCost", 5);
+            Scribe_Values.Look(ref expertiseSlotInterval, "expertiseSlotInterval", 50);
+            Scribe_Values.Look(ref expertisePointInterval, "expertisePointInterval", 5);
             Scribe_Values.Look(ref expertiseAcquireLevel, "expertiseAcquireLevel", 0);
             Scribe_Values.Look(ref topEndRetention, "topEndRetention", 0.9f);
             Scribe_Values.Look(ref qualityVanillaCapLevel, "qualityVanillaCapLevel", 80);

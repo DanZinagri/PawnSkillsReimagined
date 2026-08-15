@@ -13,19 +13,27 @@ namespace PawnSkillsReimagined
         public int level = 1;
         public float xp;
         public int spentPoints;
+        // Expertise points are a granted balance (not derived from level like skill
+        // points): +1 each time a level-up crosses an expertisePointInterval
+        // breakpoint, spent 1-per-expertise-level, and player-adjustable via dev
+        // tools. Not retroactively rebuilt, so old saves start at 0 and accrue from
+        // their next breakpoint.
+        public int expertisePoints;
 
         public void ExposeData()
         {
             Scribe_Values.Look(ref level, "level", 1);
             Scribe_Values.Look(ref xp, "xp", 0f);
             Scribe_Values.Look(ref spentPoints, "spentPoints", 0);
+            Scribe_Values.Look(ref expertisePoints, "expertisePoints", 0);
         }
     }
 
     // The leveling system: skill XP earned by pawns is funneled here (the skill
     // itself gains nothing), levels follow an Isekai-style power curve, and each
-    // level grants a point to spend on any skill (uncapped) or VSE expertise
-    // (capped at 20).
+    // level grants skill points to buy uncapped skill ranks. Character levels also
+    // feed the VSE expertise system: breakpoints grant expertise points (spent to
+    // raise expertise, capped at 20) and raise how many expertise a pawn may hold.
     public class PawnSkillsReimaginedGameComponent : GameComponent
     {
         private const float XpBase = 100f;
@@ -112,6 +120,7 @@ namespace PawnSkillsReimagined
             {
                 return;
             }
+            int before = p.level;
             p.xp += amount * PawnSkillsReimaginedMod.Settings.xpConversionRate;
             while (p.level < maxLevel && p.xp >= XpToNext(p.level))
             {
@@ -124,6 +133,7 @@ namespace PawnSkillsReimagined
                         pawn, MessageTypeDefOf.PositiveEvent, historical: false);
                 }
             }
+            GrantExpertisePoints(p, before);
             if (p.level >= maxLevel)
             {
                 p.xp = 0f;
@@ -145,12 +155,14 @@ namespace PawnSkillsReimagined
             {
                 return;
             }
+            int before = p.level;
             p.xp += amount;
             while (p.level < maxLevel && p.xp >= XpToNext(p.level))
             {
                 p.xp -= XpToNext(p.level);
                 p.level++;
             }
+            GrantExpertisePoints(p, before);
             if (p.level >= maxLevel)
             {
                 p.xp = 0f;
@@ -277,20 +289,62 @@ namespace PawnSkillsReimagined
         // level with no internal cap, so they stay capped.
         public const int ExpertiseCap = 20;
 
+        // Raise one expertise level for one expertise point. Capped at ExpertiseCap.
         public bool TrySpendPoint(Pawn pawn, VSE.ExpertiseRecord record)
         {
             if (record == null || record.Level >= ExpertiseCap)
             {
                 return false;
             }
-            int cost = PawnSkillsReimaginedMod.Settings.expertisePointCost;
-            if (AvailableFor(pawn) < cost)
+            PawnProgress p = For(pawn);
+            if (p.expertisePoints < 1)
             {
                 return false;
             }
             record.Level++;
-            For(pawn).spentPoints += cost;
+            p.expertisePoints -= 1;
             return true;
+        }
+
+        // Grant expertise points for every expertisePointInterval breakpoint the
+        // level crossed since oldLevel. Called after a level-up loop settles.
+        private static void GrantExpertisePoints(PawnProgress p, int oldLevel)
+        {
+            if (p.level <= oldLevel)
+            {
+                return;
+            }
+            int interval = Mathf.Max(1, PawnSkillsReimaginedMod.Settings.expertisePointInterval);
+            p.expertisePoints += p.level / interval - oldLevel / interval;
+        }
+
+        // Unspent expertise points available to raise expertise levels.
+        public int AvailableExpertisePoints(Pawn pawn)
+        {
+            return GetProgressOrNull(pawn)?.expertisePoints ?? 0;
+        }
+
+        // Grant (delta > 0) or revoke (delta < 0) expertise points directly, floored
+        // at zero. Dev-tool / API entry point.
+        public void AddExpertisePoints(Pawn pawn, int delta)
+        {
+            if (pawn == null || delta == 0)
+            {
+                return;
+            }
+            PawnProgress p = For(pawn);
+            p.expertisePoints = Mathf.Max(0, p.expertisePoints + delta);
+        }
+
+        // How many expertise a pawn may hold: a base of 1 plus one per
+        // expertiseSlotInterval character levels. Computed live from the pawn's
+        // level, so it is inherently per-pawn and always current with no stored
+        // state or level-up bookkeeping. Consumed by the VSE CanApplyOn override.
+        public int MaxExpertiseFor(Pawn pawn)
+        {
+            int level = GetProgressOrNull(pawn)?.level ?? 1;
+            int interval = Mathf.Max(1, PawnSkillsReimaginedMod.Settings.expertiseSlotInterval);
+            return 1 + level / interval;
         }
 
         public override void ExposeData()

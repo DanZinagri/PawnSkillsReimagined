@@ -37,6 +37,18 @@ namespace PawnSkillsReimagined
         [DebugAction(Category, "Level: -1 (no points)", actionType = PerPawn, allowedGameStates = OnMap)]
         private static void RemoveLevelNoPoints(Pawn p) => Apply(p, comp => comp.AddLevelsNoPoints(p, -1));
 
+        [DebugAction(Category, "Expertise points: +1", actionType = PerPawn, allowedGameStates = OnMap)]
+        private static void AddExpertisePoint(Pawn p) => ApplyExpertise(p, comp => comp.AddExpertisePoints(p, 1));
+
+        [DebugAction(Category, "Expertise points: -1", actionType = PerPawn, allowedGameStates = OnMap)]
+        private static void RemoveExpertisePoint(Pawn p) => ApplyExpertise(p, comp => comp.AddExpertisePoints(p, -1));
+
+        [DebugAction(Category, "Expertise points: +5", actionType = PerPawn, allowedGameStates = OnMap)]
+        private static void AddFiveExpertisePoints(Pawn p) => ApplyExpertise(p, comp => comp.AddExpertisePoints(p, 5));
+
+        [DebugAction(Category, "Expertise points: -5", actionType = PerPawn, allowedGameStates = OnMap)]
+        private static void RemoveFiveExpertisePoints(Pawn p) => ApplyExpertise(p, comp => comp.AddExpertisePoints(p, -5));
+
         // Runs the change, then floats the resulting level/point totals over the
         // pawn so the effect is visible immediately.
         private static void Apply(Pawn pawn, System.Action<PawnSkillsReimaginedGameComponent> change)
@@ -52,6 +64,22 @@ namespace PawnSkillsReimagined
                 PawnProgress p = comp.For(pawn);
                 MoteMaker.ThrowText(pawn.DrawPos, pawn.Map,
                     "Lv " + p.level + "  |  " + comp.AvailableFor(pawn) + " pts");
+            }
+        }
+
+        // As Apply, but floats the expertise-point balance instead.
+        private static void ApplyExpertise(Pawn pawn, System.Action<PawnSkillsReimaginedGameComponent> change)
+        {
+            PawnSkillsReimaginedGameComponent comp = PawnSkillsReimaginedGameComponent.Instance;
+            if (comp == null || pawn == null)
+            {
+                return;
+            }
+            change(comp);
+            if (pawn.Spawned && pawn.Map != null)
+            {
+                MoteMaker.ThrowText(pawn.DrawPos, pawn.Map,
+                    comp.AvailableExpertisePoints(pawn) + " expertise pts");
             }
         }
     }
