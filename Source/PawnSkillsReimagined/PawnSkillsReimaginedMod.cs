@@ -78,8 +78,14 @@ namespace PawnSkillsReimagined
                 "PSR_MaxCharacterLevel_Desc".Translate());
             IntRow(listing, "PSR_PointsPerLevel".Translate(), ref Settings.pointsPerLevel, ref bufPointsPerLevel, 1, 20,
                 "PSR_PointsPerLevel_Desc".Translate());
-            IntRow(listing, "PSR_ExpertiseSlotInterval".Translate(), ref Settings.expertiseSlotInterval, ref bufExpertiseSlot, 5, 200,
-                "PSR_ExpertiseSlotInterval_Desc".Translate());
+            Rect maxExpRow = listing.GetRect(28f);
+            TooltipHandler.TipRegion(maxExpRow, "PSR_ScaleMaxExpertise_Desc".Translate());
+            Widgets.CheckboxLabeled(maxExpRow, "PSR_ScaleMaxExpertise".Translate(), ref Settings.overrideMaxExpertise);
+            if (Settings.overrideMaxExpertise)
+            {
+                IntRow(listing, "PSR_ExpertiseSlotInterval".Translate(), ref Settings.expertiseSlotInterval, ref bufExpertiseSlot, 5, 200,
+                    "PSR_ExpertiseSlotInterval_Desc".Translate());
+            }
             IntRow(listing, "PSR_ExpertisePointInterval".Translate(), ref Settings.expertisePointInterval, ref bufExpertisePoint, 1, 100,
                 "PSR_ExpertisePointInterval_Desc".Translate());
             IntRow(listing, "PSR_ExpertiseUnlockLevel".Translate(), ref Settings.expertiseAcquireLevel, ref bufExpertiseAcquire,
@@ -369,6 +375,7 @@ namespace PawnSkillsReimagined
         public int maxSkillLevel = 100;                       // hard cap on skill ranks; stat curve spans this range
         public int maxCharacterLevel = 999;                   // pawn level cap, separate from skills
         public int pointsPerLevel = 5;                        // points granted per character level
+        public bool overrideMaxExpertise = true;              // true = our per-pawn scaled cap + forced overlap; false = defer to VSE's own limit
         public int expertiseSlotInterval = 50;                // character levels per +1 to a pawn's max expertise count
         public int expertisePointInterval = 5;                // character levels per +1 expertise point
         public int expertiseAcquireLevel = 0;                 // override for VSE's skill level to unlock an expertise; 0 = use VSE's own setting
@@ -396,6 +403,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref maxSkillLevel, "maxSkillLevel", 100);
             Scribe_Values.Look(ref maxCharacterLevel, "maxCharacterLevel", 999);
             Scribe_Values.Look(ref pointsPerLevel, "pointsPerLevel", 5);
+            Scribe_Values.Look(ref overrideMaxExpertise, "overrideMaxExpertise", true);
             Scribe_Values.Look(ref expertiseSlotInterval, "expertiseSlotInterval", 50);
             Scribe_Values.Look(ref expertisePointInterval, "expertisePointInterval", 5);
             Scribe_Values.Look(ref expertiseAcquireLevel, "expertiseAcquireLevel", 0);

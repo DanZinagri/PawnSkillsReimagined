@@ -21,10 +21,24 @@ namespace PawnSkillsReimagined
         }
 
         // Per-pawn maximum expertise count, replacing VSE's global MaxExpertise.
+        // When the override toggle is off, defer entirely to VSE's own setting.
         public static int MaxExpertise(Pawn pawn)
         {
+            if (!PawnSkillsReimaginedMod.Settings.overrideMaxExpertise)
+            {
+                return VSE.SkillsMod.Settings.MaxExpertise;
+            }
             return PawnSkillsReimaginedGameComponent.Instance?.MaxExpertiseFor(pawn)
                    ?? VSE.SkillsMod.Settings.MaxExpertise;
+        }
+
+        // Whether a pawn may hold multiple expertise on one skill. Our system forces
+        // this on (bounded by the per-pawn count cap instead); with the override off
+        // we defer to VSE's own AllowExpertiseOverlap setting.
+        public static bool AllowOverlap()
+        {
+            return PawnSkillsReimaginedMod.Settings.overrideMaxExpertise
+                   || VSE.SkillsMod.Settings.AllowExpertiseOverlap;
         }
 
         public static void Patch(Harmony harmony)
@@ -55,6 +69,7 @@ namespace PawnSkillsReimagined
             var codes = new List<CodeInstruction>(instructions);
             MethodInfo requiredLevel = AccessTools.Method(typeof(ExpertiseUnlockCompat), nameof(RequiredLevel));
             MethodInfo maxExpertise = AccessTools.Method(typeof(ExpertiseUnlockCompat), nameof(MaxExpertise));
+            MethodInfo allowOverlap = AccessTools.Method(typeof(ExpertiseUnlockCompat), nameof(AllowOverlap));
             bool level = false, max = false, overlap = false;
 
             for (int i = 0; i < codes.Count; i++)
@@ -84,7 +99,7 @@ namespace PawnSkillsReimagined
                 else if (f.Name == "AllowExpertiseOverlap")
                 {
                     codes[i] = pop;
-                    codes.Insert(i + 1, new CodeInstruction(OpCodes.Ldc_I4_1)); // true
+                    codes.Insert(i + 1, new CodeInstruction(OpCodes.Call, allowOverlap));
                     overlap = true;
                 }
             }

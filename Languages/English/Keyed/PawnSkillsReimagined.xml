@@ -12,6 +12,8 @@
     <PSR_MaxCharacterLevel_Desc>The pawn level cap. Tracked separately from skills; with variable point costs this leaves leeway and rewards passion investment.</PSR_MaxCharacterLevel_Desc>
     <PSR_PointsPerLevel>Skill points per level</PSR_PointsPerLevel>
     <PSR_PointsPerLevel_Desc>Points granted per character level-up. Spent on skill ranks at the passion-based costs below.</PSR_PointsPerLevel_Desc>
+    <PSR_ScaleMaxExpertise>Scale max expertise with level</PSR_ScaleMaxExpertise>
+    <PSR_ScaleMaxExpertise_Desc>On: a pawn's max expertise count grows with character level (interval below), and multiple expertise per skill are allowed. Off: defer to Vanilla Skills Expanded's own expertise limit and overlap setting instead. Either way, expertise still levels with expertise points.</PSR_ScaleMaxExpertise_Desc>
     <PSR_ExpertiseSlotInterval>Levels per expertise slot</PSR_ExpertiseSlotInterval>
     <PSR_ExpertiseSlotInterval_Desc>Character levels needed for each additional expertise a pawn may hold. A pawn can hold 1 expertise plus one more per this many levels (e.g. at 50, a level-100 pawn can hold 3). Overrides Vanilla Skills Expanded's single global limit. Multiple expertise on the same skill are allowed.</PSR_ExpertiseSlotInterval_Desc>
     <PSR_ExpertisePointInterval>Levels per expertise point</PSR_ExpertisePointInterval>
