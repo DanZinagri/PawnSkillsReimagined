@@ -124,6 +124,12 @@ namespace PawnSkillsReimagined
             {
                 return;
             }
+            // NPCs roll past vanilla's level-20 skill cap (players keep the clamped
+            // roll). OfPlayerSilentFail is null during world gen; a real faction
+            // means an NPC that should get the stretched roll + auto-spend.
+            bool npc = pawn.Faction != Faction.OfPlayerSilentFail;
+            float stretch = npc ? Mathf.Max(1f, PawnSkillsReimaginedMod.Settings.npcSkillRollStretch) : 1f;
+
             List<BackstoryDef> backstories = pawn.story?.AllBackstories;
             float rolledXp = 0f;
             foreach (SkillRecord record in pawn.skills.skills)
@@ -149,9 +155,12 @@ namespace PawnSkillsReimagined
                 }
                 total = Mathf.Max(0, total);
 
-                // Price the stripped random roll in vanilla skill XP.
-                int rolled = Mathf.Clamp(record.levelInt, 0, 20);
-                for (int level = Mathf.Min(total, 20); level < rolled; level++)
+                // Price the roll in vanilla skill XP, stretched past 20 for NPCs.
+                // record.levelInt is vanilla's rolled level (0-20); each level past
+                // 20 prices at the XP curve's terminal (max) value, so a stretched
+                // roll seeds a lot of character XP -> points -> normal-cost ranks.
+                int target = Mathf.Max(total, Mathf.RoundToInt(record.levelInt * stretch));
+                for (int level = total; level < target; level++)
                 {
                     rolledXp += SkillRecord.XpRequiredToLevelUpFrom(level);
                 }
@@ -166,13 +175,42 @@ namespace PawnSkillsReimagined
             {
                 return;
             }
-            comp.GrantStartingXP(pawn, rolledXp * multiplier);
-            // OfPlayerSilentFail: during world generation no player faction
-            // exists yet and the loud accessor spams errors (null is fine here -
-            // world pawns have their own faction and should auto-spend).
-            if (pawn.Faction != Faction.OfPlayerSilentFail)
+            // Player starting pawns bank points for manual spending; NPCs auto-spend
+            // and get the varied/tech-scaled starting XP (npc computed above).
+            float startXp = rolledXp * multiplier;
+            if (npc)
+            {
+                // Widen the per-pawn spread so outcomes vary more and a fair share
+                // of pawns end up notably stronger (peaking a skill past 20 as the
+                // weighted auto-spend concentrates the extra points). A Gaussian
+                // keeps most near the baseline with a tail of standouts; higher-tech
+                // factions additionally get a bit more schooling.
+                float variance = Mathf.Clamp(Rand.Gaussian(1.1f, 0.42f), 0.7f, 3.8f);
+                startXp *= variance * StartingXpTechFactor(pawn);
+            }
+            comp.GrantStartingXP(pawn, startXp);
+            if (npc)
             {
                 comp.AutoSpendPoints(pawn);
+            }
+        }
+
+        // Higher-tech factions produce better-schooled pawns. Industrial is the
+        // neutral baseline, also used when a pawn's faction has no defined tech
+        // level (e.g. no faction at all).
+        private static float StartingXpTechFactor(Pawn pawn)
+        {
+            var s = PawnSkillsReimaginedMod.Settings;
+            TechLevel tech = pawn.Faction?.def?.techLevel ?? TechLevel.Industrial;
+            switch (tech)
+            {
+                case TechLevel.Animal:
+                case TechLevel.Neolithic:  return s.techMultNeolithic;
+                case TechLevel.Medieval:   return s.techMultMedieval;
+                case TechLevel.Spacer:     return s.techMultSpacer;
+                case TechLevel.Ultra:      return s.techMultUltra;
+                case TechLevel.Archotech:  return s.techMultArchotech;
+                default:                   return s.techMultIndustrial;   // Industrial / Undefined
             }
         }
 

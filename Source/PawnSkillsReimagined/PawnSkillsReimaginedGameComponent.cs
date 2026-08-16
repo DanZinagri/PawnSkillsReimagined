@@ -236,7 +236,8 @@ namespace PawnSkillsReimagined
         // Spend all affordable points randomly across usable skills, weighted
         // toward existing (backstory) ranks so builds follow the pawn's story.
         // Passion costs apply, so cheap passionate skills naturally soak up more
-        // ranks. Used for generated world pawns.
+        // ranks. NPCs pay the same cost the player would, so a recruited pawn's
+        // point/skill numbers stay consistent. Used for generated world pawns.
         public void AutoSpendPoints(Pawn pawn)
         {
             if (pawn?.skills?.skills == null)

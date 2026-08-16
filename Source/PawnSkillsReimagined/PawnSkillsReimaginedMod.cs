@@ -22,9 +22,12 @@ namespace PawnSkillsReimagined
         private string bufRequirement;
         private string bufStartingXp;
         private string bufScaleInterval;
+        private string bufNpcStretch;
+        private string bufTechNeo, bufTechMed, bufTechInd, bufTechSpacer, bufTechUltra, bufTechArch;
         private readonly Dictionary<string, string> bufPassionCosts = new Dictionary<string, string>();
 
         private Vector2 settingsScroll;
+        private int settingsTab;
 
         public PawnSkillsReimaginedMod(ModContentPack content) : base(content)
         {
@@ -35,6 +38,27 @@ namespace PawnSkillsReimagined
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
+            Rect body = new Rect(inRect.x, inRect.y + 34f, inRect.width, inRect.height - 34f);
+            var tabs = new List<TabRecord>
+            {
+                new TabRecord("PSR_TabGeneral".Translate(), () => settingsTab = 0, settingsTab == 0),
+                new TabRecord("PSR_TabPawnGen".Translate(), () => settingsTab = 1, settingsTab == 1),
+            };
+            Widgets.DrawMenuSection(body);
+            TabDrawer.DrawTabs(body, tabs);
+            Rect content = body.ContractedBy(12f);
+            if (settingsTab == 1)
+            {
+                DoPawnGenTab(content);
+            }
+            else
+            {
+                DoGeneralTab(content);
+            }
+        }
+
+        private void DoGeneralTab(Rect inRect)
+        {
             // Core passion rows that actually exist, plus the "Other" row.
             int passionRows = 1;
             foreach (string defName in PointCosts.CoreDefNames)
@@ -44,7 +68,7 @@ namespace PawnSkillsReimagined
                     passionRows++;
                 }
             }
-            float viewHeight = 15 * 32f + passionRows * 34f + 130f;
+            float viewHeight = 14 * 32f + passionRows * 34f + 130f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -71,8 +95,6 @@ namespace PawnSkillsReimagined
                 "PSR_XpConversion_Desc".Translate());
             FloatRow(listing, "PSR_XpRequirement".Translate(), ref Settings.xpRequirementMultiplier, ref bufRequirement, 0.1f, 10f,
                 "PSR_XpRequirement_Desc".Translate());
-            FloatRow(listing, "PSR_StartingXp".Translate(), ref Settings.startingXpMultiplier, ref bufStartingXp, 0f, 5f,
-                "PSR_StartingXp_Desc".Translate());
 
             listing.Gap(4f);
             Text.Font = GameFont.Tiny;
@@ -117,6 +139,37 @@ namespace PawnSkillsReimagined
 
             listing.End();
             Widgets.EndScrollView();
+        }
+
+        private void DoPawnGenTab(Rect inRect)
+        {
+            var listing = new Listing_Standard();
+            listing.Begin(inRect);
+
+            FloatRow(listing, "PSR_StartingXp".Translate(), ref Settings.startingXpMultiplier, ref bufStartingXp, 0f, 5f,
+                "PSR_StartingXp_Desc".Translate());
+            FloatRow(listing, "PSR_NpcRollStretch".Translate(), ref Settings.npcSkillRollStretch, ref bufNpcStretch, 1f, 3f,
+                "PSR_NpcRollStretch_Desc".Translate());
+
+            listing.Gap(10f);
+            Text.Font = GameFont.Medium;
+            listing.Label("PSR_TechHeader".Translate());
+            Text.Font = GameFont.Tiny;
+            GUI.color = Color.gray;
+            listing.Label("PSR_TechNote".Translate());
+            GUI.color = Color.white;
+            Text.Font = GameFont.Small;
+            listing.Gap(4f);
+
+            string tip = "PSR_TechMult_Desc".Translate();
+            FloatRow(listing, "PSR_TechNeolithic".Translate(), ref Settings.techMultNeolithic, ref bufTechNeo, 0.1f, 5f, tip);
+            FloatRow(listing, "PSR_TechMedieval".Translate(), ref Settings.techMultMedieval, ref bufTechMed, 0.1f, 5f, tip);
+            FloatRow(listing, "PSR_TechIndustrial".Translate(), ref Settings.techMultIndustrial, ref bufTechInd, 0.1f, 5f, tip);
+            FloatRow(listing, "PSR_TechSpacer".Translate(), ref Settings.techMultSpacer, ref bufTechSpacer, 0.1f, 5f, tip);
+            FloatRow(listing, "PSR_TechUltra".Translate(), ref Settings.techMultUltra, ref bufTechUltra, 0.1f, 5f, tip);
+            FloatRow(listing, "PSR_TechArchotech".Translate(), ref Settings.techMultArchotech, ref bufTechArch, 0.1f, 5f, tip);
+
+            listing.End();
         }
 
         // Passion icon + label | slider | editable integer field, keyed by the
@@ -293,6 +346,15 @@ namespace PawnSkillsReimagined
         public float xpConversionRate = 1f;                   // skill XP -> pawn level XP multiplier
         public float xpRequirementMultiplier = 1f;            // scales XP needed per level
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
+        public float npcSkillRollStretch = 1.5f;              // NPC skill roll extends past vanilla's 20 cap by this factor
+        // NPC starting-XP multipliers by faction tech level (Animal->Neolithic,
+        // Undefined->Industrial). Higher tech = better-schooled pawns.
+        public float techMultNeolithic = 1f;
+        public float techMultMedieval = 1.5f;
+        public float techMultIndustrial = 2f;
+        public float techMultSpacer = 2.5f;
+        public float techMultUltra = 3f;
+        public float techMultArchotech = 3.5f;
         public bool scaleCostWithLevel = true;                // rank cost rises with skill level
         public int scaleCostInterval = 10;                    // +1 cost every N ranks
         public Dictionary<string, int> passionCosts = new Dictionary<string, int>();
@@ -311,6 +373,13 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref xpConversionRate, "xpConversionRate", 1f);
             Scribe_Values.Look(ref xpRequirementMultiplier, "xpRequirementMultiplier", 1f);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);
+            Scribe_Values.Look(ref npcSkillRollStretch, "npcSkillRollStretch", 1.5f);
+            Scribe_Values.Look(ref techMultNeolithic, "techMultNeolithic", 1f);
+            Scribe_Values.Look(ref techMultMedieval, "techMultMedieval", 1.5f);
+            Scribe_Values.Look(ref techMultIndustrial, "techMultIndustrial", 2f);
+            Scribe_Values.Look(ref techMultSpacer, "techMultSpacer", 2.5f);
+            Scribe_Values.Look(ref techMultUltra, "techMultUltra", 3f);
+            Scribe_Values.Look(ref techMultArchotech, "techMultArchotech", 3.5f);
             Scribe_Values.Look(ref scaleCostWithLevel, "scaleCostWithLevel", true);
             Scribe_Values.Look(ref scaleCostInterval, "scaleCostInterval", 10);
             Scribe_Collections.Look(ref passionCosts, "passionCosts", LookMode.Value, LookMode.Value);

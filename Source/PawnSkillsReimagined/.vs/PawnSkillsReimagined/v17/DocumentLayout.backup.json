@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\harmonypatches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:harmonypatches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\expertiseunlockcompat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:expertiseunlockcompat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -13,10 +17,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\pawnskillsreimaginedgamecomponent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:pawnskillsreimaginedgamecomponent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\harmonypatches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|solutionrelative:harmonypatches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2AF09F9B-6E05-9E1D-6EEA-3EBA66CCB4C3}|PawnSkillsReimagined.csproj|e:\\steamlibrary\\steamapps\\common\\rimworld\\mods\\pawnskillsreimagined\\source\\pawnskillsreimagined\\characterdevelopmentcompat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -46,33 +46,19 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "ExpertiseUnlockCompat.cs",
               "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\ExpertiseUnlockCompat.cs",
               "RelativeDocumentMoniker": "ExpertiseUnlockCompat.cs",
               "ToolTip": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\ExpertiseUnlockCompat.cs",
               "RelativeToolTip": "ExpertiseUnlockCompat.cs",
-              "ViewState": "AgIAAD4AAAAAAAAAAAAIwDMAAAAjAAAAAAAAAA==",
+              "ViewState": "AgIAAD4AAAAAAAAAAAAIwFoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-15T17:54:20.351Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "PawnSkillsReimaginedAPI.cs",
-              "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimaginedAPI.cs",
-              "RelativeDocumentMoniker": "PawnSkillsReimaginedAPI.cs",
-              "ToolTip": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimaginedAPI.cs",
-              "RelativeToolTip": "PawnSkillsReimaginedAPI.cs",
-              "ViewState": "AgIAAC0AAAAAAAAAAAAmwCIAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-26T22:34:00.508Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-15T17:54:20.351Z"
             },
             {
               "$type": "Document",
@@ -124,7 +110,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "PawnSkillsReimaginedGameComponent.cs",
               "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimaginedGameComponent.cs",
               "RelativeDocumentMoniker": "PawnSkillsReimaginedGameComponent.cs",
@@ -148,15 +134,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
               "Title": "HarmonyPatches.cs",
               "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\HarmonyPatches.cs",
               "RelativeDocumentMoniker": "HarmonyPatches.cs",
               "ToolTip": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\HarmonyPatches.cs",
               "RelativeToolTip": "HarmonyPatches.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAAAF0BAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAKQAAAAAAAAAAAAAALUAAABSAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-20T21:09:55.599Z"
+              "WhenOpened": "2026-07-20T21:09:55.599Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PawnSkillsReimaginedAPI.cs",
+              "DocumentMoniker": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimaginedAPI.cs",
+              "RelativeDocumentMoniker": "PawnSkillsReimaginedAPI.cs",
+              "ToolTip": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimaginedAPI.cs",
+              "RelativeToolTip": "PawnSkillsReimaginedAPI.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAmwCIAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-26T22:34:00.508Z"
             }
           ]
         }
