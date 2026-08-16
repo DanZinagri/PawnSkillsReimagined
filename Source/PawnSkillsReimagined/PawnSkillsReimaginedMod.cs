@@ -27,6 +27,7 @@ namespace PawnSkillsReimagined
         private readonly Dictionary<string, string> bufPassionCosts = new Dictionary<string, string>();
 
         private Vector2 settingsScroll;
+        private Vector2 costsScroll;
         private int settingsTab;
 
         public PawnSkillsReimaginedMod(ModContentPack content) : base(content)
@@ -42,6 +43,7 @@ namespace PawnSkillsReimagined
             var tabs = new List<TabRecord>
             {
                 new TabRecord("PSR_TabGeneral".Translate(), () => settingsTab = 0, settingsTab == 0),
+                new TabRecord("PSR_TabSkillCosts".Translate(), () => settingsTab = 2, settingsTab == 2),
                 new TabRecord("PSR_TabPawnGen".Translate(), () => settingsTab = 1, settingsTab == 1),
             };
             Widgets.DrawMenuSection(body);
@@ -51,6 +53,10 @@ namespace PawnSkillsReimagined
             {
                 DoPawnGenTab(content);
             }
+            else if (settingsTab == 2)
+            {
+                DoSkillCostsTab(content);
+            }
             else
             {
                 DoGeneralTab(content);
@@ -59,16 +65,7 @@ namespace PawnSkillsReimagined
 
         private void DoGeneralTab(Rect inRect)
         {
-            // Core passion rows that actually exist, plus the "Other" row.
-            int passionRows = 1;
-            foreach (string defName in PointCosts.CoreDefNames)
-            {
-                if (DefDatabase<PassionDef>.GetNamedSilentFail(defName) != null)
-                {
-                    passionRows++;
-                }
-            }
-            float viewHeight = 14 * 32f + passionRows * 34f + 130f;
+            float viewHeight = 11 * 32f + 40f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -103,6 +100,20 @@ namespace PawnSkillsReimagined
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
 
+            listing.End();
+            Widgets.EndScrollView();
+        }
+
+        private void DoSkillCostsTab(Rect inRect)
+        {
+            int passionRows = DefDatabase<PassionDef>.AllDefsListForReading.Count;
+            float viewHeight = (passionRows + 7) * 34f + 90f;
+            Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
+            Widgets.BeginScrollView(inRect, ref costsScroll, viewRect);
+
+            var listing = new Listing_Standard();
+            listing.Begin(viewRect);
+
             Rect scaleRow = listing.GetRect(28f);
             TooltipHandler.TipRegion(scaleRow, "PSR_ScaleCost_Desc".Translate());
             Widgets.CheckboxLabeled(scaleRow, "PSR_ScaleCost".Translate(), ref Settings.scaleCostWithLevel);
@@ -111,8 +122,6 @@ namespace PawnSkillsReimagined
                 IntRow(listing, "PSR_ScaleInterval".Translate(), ref Settings.scaleCostInterval, ref bufScaleInterval, 1, 50,
                     "PSR_ScaleInterval_Desc".Translate());
             }
-
-            
 
             listing.Gap(10f);
             Text.Font = GameFont.Medium;
@@ -124,22 +133,44 @@ namespace PawnSkillsReimagined
             Text.Font = GameFont.Small;
             listing.Gap(4f);
 
-            // One row per core passion that exists, then a single "Other" row
-            // covering every modded / variable-rate passion.
-            foreach (string defName in PointCosts.CoreDefNames)
+            // Our hand-tuned passions first, in a fixed order.
+            foreach (string defName in PointCosts.DefinedDefNames)
             {
                 PassionDef passion = DefDatabase<PassionDef>.GetNamedSilentFail(defName);
                 if (passion != null)
                 {
-                    PassionCostRow(listing, passion.defName, passion.LabelCap, passion.Icon, null);
+                    PassionCostRow(listing, passion.defName, PassionLabel(passion), passion.Icon, null);
                 }
             }
-            PassionCostRow(listing, PointCosts.OtherKey, "PSR_OtherPassions".Translate(), null,
-                "PSR_OtherPassions_Desc".Translate());
+
+            // Then a divider and every other (modded) passion the game has loaded.
+            bool anyOther = false;
+            foreach (PassionDef passion in DefDatabase<PassionDef>.AllDefsListForReading)
+            {
+                if (!PointCosts.IsDefined(passion.defName))
+                {
+                    anyOther = true;
+                    break;
+                }
+            }
+            if (anyOther)
+            {
+                listing.GapLine();
+                foreach (PassionDef passion in DefDatabase<PassionDef>.AllDefsListForReading)
+                {
+                    if (!PointCosts.IsDefined(passion.defName))
+                    {
+                        PassionCostRow(listing, passion.defName, PassionLabel(passion), passion.Icon, null);
+                    }
+                }
+            }
 
             listing.End();
             Widgets.EndScrollView();
         }
+
+        private static string PassionLabel(PassionDef passion) =>
+            passion.label.NullOrEmpty() ? passion.defName : passion.LabelCap;
 
         private void DoPawnGenTab(Rect inRect)
         {
@@ -173,7 +204,7 @@ namespace PawnSkillsReimagined
         }
 
         // Passion icon + label | slider | editable integer field, keyed by the
-        // passionCosts dict key (a core defName or PointCosts.OtherKey).
+        // passionCosts dict key (the passion's defName).
         private void PassionCostRow(Listing_Standard listing, string key, string label, Texture2D icon, string tooltip)
         {
             Rect row = listing.GetRect(32f);
@@ -198,7 +229,7 @@ namespace PawnSkillsReimagined
             int value = PointCosts.CostForKey(key);
 
             Rect sliderRect = new Rect(row.x + row.width * 0.44f, row.y + 6f, row.width * 0.36f, 22f);
-            int slid = Mathf.RoundToInt(Widgets.HorizontalSlider(sliderRect, value, 1f, 20f, true, null, null, null, 1f));
+            int slid = Mathf.RoundToInt(Widgets.HorizontalSlider(sliderRect, value, 1f, 100f, true, null, null, null, 1f));
             if (slid != value)
             {
                 value = slid;
@@ -218,7 +249,7 @@ namespace PawnSkillsReimagined
                 bufPassionCosts[key] = edited;
                 if (int.TryParse(edited, out int parsed))
                 {
-                    Settings.passionCosts[key] = Mathf.Clamp(parsed, 1, 20);
+                    Settings.passionCosts[key] = Mathf.Clamp(parsed, 1, 100);
                 }
             }
         }

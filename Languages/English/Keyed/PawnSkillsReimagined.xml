@@ -31,6 +31,7 @@
     <PSR_NpcRollStretch>NPC skill roll stretch</PSR_NpcRollStretch>
     <PSR_NpcRollStretch_Desc>Vanilla caps a pawn's rolled skills at 20. For generated NPCs this stretches that roll past the cap by this factor (e.g. 1.5 lets a skill vanilla rolled to 20 count as 30), so skilled factions produce meaningfully stronger pawns. The extra is granted as starting XP and spent at normal cost, so a recruited pawn's numbers stay consistent. 1.0 = vanilla cap. Does not affect your starting colonists.</PSR_NpcRollStretch_Desc>
     <PSR_TabGeneral>General</PSR_TabGeneral>
+    <PSR_TabSkillCosts>Skill costs</PSR_TabSkillCosts>
     <PSR_TabPawnGen>Pawn generation</PSR_TabPawnGen>
     <PSR_TechHeader>Tech-level starting XP</PSR_TechHeader>
     <PSR_TechNote>Extra starting XP for generated NPCs based on their faction's tech level, so higher-tech pawns come out better trained. Also adds per-pawn variance so some pawns stand out. Does not affect your own starting colonists. Animal factions use the Neolithic value; factions with no tech level use Industrial.</PSR_TechNote>
@@ -48,9 +49,7 @@
 
     <!-- Settings: passion cost section -->
     <PSR_PassionCostsHeader>Skill rank costs by passion</PSR_PassionCostsHeader>
-    <PSR_PassionCostsNote>Points needed to raise a skill by one rank, based on its passion. Passionate skills are cheaper to train. Costs are not refunded if a passion changes later.</PSR_PassionCostsNote>
-    <PSR_OtherPassions>Other passions</PSR_OtherPassions>
-    <PSR_OtherPassions_Desc>Cost for any passion not listed above - modded passions, which usually have variable learning rates.</PSR_OtherPassions_Desc>
+    <PSR_PassionCostsNote>Points needed to raise a skill by one rank, based on its passion. Passionate skills are cheaper to train. Every passion in your modlist gets its own row. Costs are not refunded if a passion changes later.</PSR_PassionCostsNote>
 
     <!-- Settings: footer note. {0} = current level cap -->
     <PSR_CurveNote>Level XP curve: 100 x level^1.5 x requirement multiplier. Skills gain no XP directly and never decay; passions and learning-rate modifiers change how fast the pawn levels instead. Current level cap: {0}</PSR_CurveNote>

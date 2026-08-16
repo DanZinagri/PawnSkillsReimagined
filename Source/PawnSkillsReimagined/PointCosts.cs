@@ -1,4 +1,3 @@
-using System;
 using RimWorld;
 using Verse;
 using VSE.Passions;
@@ -10,37 +9,32 @@ namespace PawnSkillsReimagined
     {
         public const int FallbackCost = 5;
 
-        // Settings key + synthetic passion key for the shared "Other" cost.
-        // Not a real defName, so it never collides in the passionCosts dict.
-        public const string OtherKey = "PSR_Other";
+        // Passions with hand-tuned defaults, listed first in the settings tab above
+        // a divider that separates them from the auto-generated modded-passion rows.
+        public static readonly string[] DefinedDefNames =
+            { "None", "Minor", "Major", "VSE_Critical", "VSE_Apathy", "AS_FrozenPassion" };
 
-        // Passions that get their own configurable row; everything else folds
-        // into OtherKey.
-        public static readonly string[] CoreDefNames =
-            { "None", "Minor", "Major", "VSE_Critical", "VSE_Apathy" };
+        public static bool IsDefined(string defName) => System.Array.IndexOf(DefinedDefNames, defName) >= 0;
 
-        public static bool IsCore(string defName) => Array.IndexOf(CoreDefNames, defName) >= 0;
-
-        // The settings/dict key a passion draws its cost from.
-        public static string KeyFor(PassionDef def)
-        {
-            return def != null && IsCore(def.defName) ? def.defName : OtherKey;
-        }
+        // The settings/dict key a passion draws its cost from: its own defName, so
+        // every passion (core or modded) is configured individually.
+        public static string KeyFor(PassionDef def) => def?.defName ?? "None";
 
         public static int DefaultForKey(string key)
         {
             switch (key)
             {
-                case "None": return 5;          // no passion
-                case "Minor": return 3;         // interested
-                case "Major": return 2;         // burning
-                case "VSE_Critical": return 2;  // critical
-                case "VSE_Apathy": return 8;    // uninterested
-                default: return 4;              // Other: modded / variable-rate passions
+                case "None": return 5;              // no passion
+                case "Minor": return 3;             // interested
+                case "Major": return 2;             // burning
+                case "VSE_Critical": return 2;      // critical
+                case "VSE_Apathy": return 8;        // uninterested
+                case "AS_FrozenPassion": return 10; // Alpha Skills: no learning, most expensive
+                default: return 4;                  // any other modded passion
             }
         }
 
-        // Cost for a settings key (a core defName or OtherKey).
+        // Cost for a passion's settings key (its defName).
         public static int CostForKey(string key)
         {
             var costs = PawnSkillsReimaginedMod.Settings.passionCosts;
