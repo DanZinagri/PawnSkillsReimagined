@@ -16,10 +16,13 @@ namespace PawnSkillsReimagined
             var harmony = new Harmony("DanZinagri.PawnSkillsReimagined");
             var self = typeof(HarmonyPatches);
 
-            // -- XP funnel: skills never gain or lose XP; earned XP levels the pawn
+            // -- XP funnel: skills never gain or lose XP; earned XP levels the pawn.
+            // The transpiler lifts Learn's own hardcoded level-20 cap to maxSkillLevel
+            // so dual-level skills can climb (and don't reset to 20) past vanilla's cap.
             harmony.Patch(
                 AccessTools.Method(typeof(SkillRecord), nameof(SkillRecord.Learn)),
-                prefix: new HarmonyMethod(self, nameof(Learn_Prefix)) { priority = Priority.Last });
+                prefix: new HarmonyMethod(self, nameof(Learn_Prefix)) { priority = Priority.Last },
+                transpiler: new HarmonyMethod(self, nameof(LearnLevelCap_Transpiler)));
 
             // -- Deterministic starting skills (backstory sums only)
             harmony.Patch(
@@ -90,7 +93,8 @@ namespace PawnSkillsReimagined
         // prefixes that modify xp run before we capture it.
         public static bool Learn_Prefix(SkillRecord __instance, ref float xp, bool direct, bool ignoreLearnRate)
         {
-            bool dualLevel = PawnSkillsReimaginedMod.Settings.skillsLevelNormally;
+            var settings = PawnSkillsReimaginedMod.Settings;
+            bool dualLevel = settings.skillsLevelNormally;
             if (xp > 0f && !__instance.TotallyDisabled)
             {
                 float funneled = ignoreLearnRate ? xp : xp * __instance.LearnRateFactor(direct);
@@ -107,15 +111,64 @@ namespace PawnSkillsReimagined
                     PawnSkillsReimaginedGameComponent.Instance?.GainXP(__instance.Pawn, funneled);
                 }
             }
-            // Always discard decay so skills never rust. Positive XP is zeroed in
-            // normal mode (only the character levels); in dual-level mode it is left
-            // intact so the skill also levels normally on top of the funnel. Other
-            // mods' Learn postfixes still fire either way.
-            if (xp < 0f || !dualLevel)
+
+            // Decide whether the original Learn keeps the xp (levels the skill /
+            // applies decay) or runs as a no-op. Positive XP passes through only in
+            // dual-level mode; negative XP (decay) passes only when decay is enabled
+            // and the skill is above its committed floor. Everything else is zeroed
+            // (no skill gain, no rust) - the original still runs so other mods'
+            // Learn postfixes fire.
+            bool keep;
+            if (xp > 0f)
+            {
+                keep = dualLevel;
+            }
+            else if (xp < 0f)
+            {
+                keep = dualLevel && settings.enableSkillDecay && AllowDecay(__instance);
+            }
+            else
+            {
+                keep = false;
+            }
+            if (!keep)
             {
                 xp = 0f;
             }
             return true;
+        }
+
+        // True if the skill sits above its committed decay floor, so decay may
+        // proceed. Lazily initializes the floor (= current level) on first touch;
+        // only reached on the cold decay path when the feature is enabled.
+        private static bool AllowDecay(SkillRecord record)
+        {
+            var comp = PawnSkillsReimaginedGameComponent.Instance;
+            if (comp == null || record.Pawn == null)
+            {
+                return false;
+            }
+            return record.levelInt > comp.GetOrInitDecayFloor(record.Pawn, record);
+        }
+
+        // Lift Learn's own level cap. Its level-up section hardcodes 20 three times
+        // (levelInt == 20, levelInt >= 20, levelInt = 20) to cap and even RESET the
+        // skill to 20; in dual-level mode that would clamp/reset skills bought past
+        // 20. The only other int literal in Learn is 14 (a tale trigger), so swapping
+        // every ldc.i4.s 20 to MaxSkillLevelInt hits exactly the three caps. Inert in
+        // normal mode (our prefix zeroes the xp, so Learn's loop never runs).
+        public static IEnumerable<CodeInstruction> LearnLevelCap_Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var maxLevel = AccessTools.Method(typeof(HarmonyPatches), nameof(MaxSkillLevelInt));
+            foreach (CodeInstruction instruction in instructions)
+            {
+                if (instruction.opcode == OpCodes.Ldc_I4_S && instruction.OperandIs((sbyte)20))
+                {
+                    instruction.opcode = OpCodes.Call;
+                    instruction.operand = maxLevel;
+                }
+                yield return instruction;
+            }
         }
 
         // --------------------------------------------------------------------

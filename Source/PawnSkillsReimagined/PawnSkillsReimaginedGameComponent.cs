@@ -19,6 +19,10 @@ namespace PawnSkillsReimagined
         // tools. Not retroactively rebuilt, so old saves start at 0 and accrue from
         // their next breakpoint.
         public int expertisePoints;
+        // Per-skill decay floor (level a skill may not decay below), only used when
+        // dual-level + skill decay are on. Null until first touched; entries are
+        // created lazily so this stays sparse and empty otherwise.
+        public Dictionary<SkillDef, int> skillFloor;
 
         public void ExposeData()
         {
@@ -26,6 +30,11 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref xp, "xp", 0f);
             Scribe_Values.Look(ref spentPoints, "spentPoints", 0);
             Scribe_Values.Look(ref expertisePoints, "expertisePoints", 0);
+            Scribe_Collections.Look(ref skillFloor, "skillFloor", LookMode.Def, LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit && skillFloor != null)
+            {
+                skillFloor.RemoveAll(kvp => kvp.Key == null);
+            }
         }
     }
 
@@ -277,13 +286,52 @@ namespace PawnSkillsReimagined
             {
                 return false;
             }
+            PawnProgress p = For(pawn);
             record.levelInt++;
-            For(pawn).spentPoints += cost;
+            p.spentPoints += cost;
+            // A bought rank is committed, so it raises the skill's decay floor (only
+            // relevant while decay is on; otherwise no floor is tracked).
+            var settings = PawnSkillsReimaginedMod.Settings;
+            if (settings.skillsLevelNormally && settings.enableSkillDecay)
+            {
+                RaiseDecayFloor(p, record);
+            }
             // Skills raised via points bypass SkillRecord.Learn, so mods watching
             // it for skill-increase rewards (Character Development) miss the event
             // - re-emit it. No-ops when that mod isn't loaded.
             CharacterDevelopmentCompat.NotifySkillIncreased(pawn, record.def, record.levelInt);
             return true;
+        }
+
+        // Decay floor for a skill (level it may not decay below), lazily created on
+        // first touch at the skill's current level so all committed ranks stay
+        // protected. Only consulted while dual-level + skill decay are on.
+        public int GetOrInitDecayFloor(Pawn pawn, SkillRecord record)
+        {
+            PawnProgress p = For(pawn);
+            if (p.skillFloor == null)
+            {
+                p.skillFloor = new Dictionary<SkillDef, int>();
+            }
+            if (!p.skillFloor.TryGetValue(record.def, out int floor))
+            {
+                floor = record.levelInt;
+                p.skillFloor[record.def] = floor;
+            }
+            return floor;
+        }
+
+        // Raise a skill's floor by one committed rank (init to the current level if
+        // it hasn't been tracked yet). Called after a rank is bought.
+        private static void RaiseDecayFloor(PawnProgress p, SkillRecord record)
+        {
+            if (p.skillFloor == null)
+            {
+                p.skillFloor = new Dictionary<SkillDef, int>();
+            }
+            p.skillFloor[record.def] = p.skillFloor.TryGetValue(record.def, out int floor)
+                ? floor + 1
+                : record.levelInt;
         }
 
         // Maximum level for point-bought expertise; their stat effects scale per
