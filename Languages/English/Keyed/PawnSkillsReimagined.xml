@@ -32,6 +32,8 @@
     <PSR_StartingXp_Desc>The random skill levels vanilla would have rolled for a new pawn (from age and life experience) are converted into starting character XP instead. World pawns spend the resulting points randomly, weighted toward their backstory skills; your starting colonists keep the points for you to spend. 0 disables starting XP.</PSR_StartingXp_Desc>
     <PSR_NpcRollStretch>NPC skill roll stretch</PSR_NpcRollStretch>
     <PSR_NpcRollStretch_Desc>Vanilla caps a pawn's rolled skills at 20. For generated NPCs this stretches that roll past the cap by this factor (e.g. 1.5 lets a skill vanilla rolled to 20 count as 30), so skilled factions produce meaningfully stronger pawns. The extra is granted as starting XP and spent at normal cost, so a recruited pawn's numbers stay consistent. 1.0 = vanilla cap. Does not affect your starting colonists.</PSR_NpcRollStretch_Desc>
+    <PSR_SkillsLevelNormally>Skills can level normally</PSR_SkillsLevelNormally>
+    <PSR_SkillsLevelNormally_Desc>Off (default): earned skill XP is funnelled entirely into character levels and the skill itself does not rise on its own. On: the XP still funnels to the character level, but also levels the skill the vanilla way on top of it - so skills climb both from use and from spent points. Skills still never rust either way.</PSR_SkillsLevelNormally_Desc>
     <PSR_TabGeneral>General</PSR_TabGeneral>
     <PSR_TabSkillCosts>Skill costs</PSR_TabSkillCosts>
     <PSR_TabPawnGen>Pawn generation</PSR_TabPawnGen>

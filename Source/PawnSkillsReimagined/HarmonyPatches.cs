@@ -90,23 +90,31 @@ namespace PawnSkillsReimagined
         // prefixes that modify xp run before we capture it.
         public static bool Learn_Prefix(SkillRecord __instance, ref float xp, bool direct, bool ignoreLearnRate)
         {
+            bool dualLevel = PawnSkillsReimaginedMod.Settings.skillsLevelNormally;
             if (xp > 0f && !__instance.TotallyDisabled)
             {
                 float funneled = ignoreLearnRate ? xp : xp * __instance.LearnRateFactor(direct);
                 if (funneled > 0f)
                 {
-                    if (!direct)
+                    // In dual-level mode the original Learn runs with the real xp and
+                    // does its own daily-saturation bookkeeping; otherwise we zero xp
+                    // and keep that bookkeeping alive ourselves so the 4000 xp/day
+                    // soft cap still applies to the funnel.
+                    if (!direct && !dualLevel)
                     {
-                        // Keep the daily saturation bookkeeping alive so the
-                        // 4000 xp/day soft cap still applies to funneled XP.
                         __instance.xpSinceMidnight += funneled;
                     }
                     PawnSkillsReimaginedGameComponent.Instance?.GainXP(__instance.Pawn, funneled);
                 }
             }
-            // Zero both gains and decay; the original runs as a no-op so other
-            // mods' Learn postfixes still fire (and see xp = 0).
-            xp = 0f;
+            // Always discard decay so skills never rust. Positive XP is zeroed in
+            // normal mode (only the character levels); in dual-level mode it is left
+            // intact so the skill also levels normally on top of the funnel. Other
+            // mods' Learn postfixes still fire either way.
+            if (xp < 0f || !dualLevel)
+            {
+                xp = 0f;
+            }
             return true;
         }
 

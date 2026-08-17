@@ -65,7 +65,7 @@ namespace PawnSkillsReimagined
 
         private void DoGeneralTab(Rect inRect)
         {
-            float viewHeight = 11 * 32f + 40f;
+            float viewHeight = 13 * 32f + 40f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -98,6 +98,10 @@ namespace PawnSkillsReimagined
                 "PSR_XpConversion_Desc".Translate());
             FloatRow(listing, "PSR_XpRequirement".Translate(), ref Settings.xpRequirementMultiplier, ref bufRequirement, 0.1f, 10f,
                 "PSR_XpRequirement_Desc".Translate());
+
+            Rect normalRow = listing.GetRect(28f);
+            TooltipHandler.TipRegion(normalRow, "PSR_SkillsLevelNormally_Desc".Translate());
+            Widgets.CheckboxLabeled(normalRow, "PSR_SkillsLevelNormally".Translate(), ref Settings.skillsLevelNormally);
 
             listing.Gap(4f);
             Text.Font = GameFont.Tiny;
@@ -383,6 +387,7 @@ namespace PawnSkillsReimagined
         public int qualityVanillaCapLevel = 80;              // skill level where crafting quality reaches vanilla's level-20 ceiling
         public float xpConversionRate = 1f;                   // skill XP -> pawn level XP multiplier
         public float xpRequirementMultiplier = 1f;            // scales XP needed per level
+        public bool skillsLevelNormally = false;              // on = funneled XP also levels the skill itself (vanilla-style)
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
         public float npcSkillRollStretch = 1.5f;              // NPC skill roll extends past vanilla's 20 cap by this factor
         // NPC starting-XP multipliers by faction tech level (Animal->Neolithic,
@@ -411,6 +416,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref qualityVanillaCapLevel, "qualityVanillaCapLevel", 80);
             Scribe_Values.Look(ref xpConversionRate, "xpConversionRate", 1f);
             Scribe_Values.Look(ref xpRequirementMultiplier, "xpRequirementMultiplier", 1f);
+            Scribe_Values.Look(ref skillsLevelNormally, "skillsLevelNormally", false);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);
             Scribe_Values.Look(ref npcSkillRollStretch, "npcSkillRollStretch", 1.5f);
             Scribe_Values.Look(ref techMultNeolithic, "techMultNeolithic", 1f);
