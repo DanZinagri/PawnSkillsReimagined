@@ -29,6 +29,11 @@ namespace PawnSkillsReimagined
                 AccessTools.Method(typeof(PawnGenerator), "GenerateSkills"),
                 postfix: new HarmonyMethod(self, nameof(GenerateSkills_Postfix)));
 
+            // -- Extend skill decay above 20 (vanilla's decay switch stops at 20)
+            harmony.Patch(
+                AccessTools.Method(typeof(SkillRecord), nameof(SkillRecord.Interval)),
+                postfix: new HarmonyMethod(self, nameof(Interval_Postfix)));
+
             // -- Stat scaling across the full rank range --------------------------
             // Prefixes that skip the original: these run on the stat hot path,
             // and a postfix would waste the original's work (including its own
@@ -149,6 +154,38 @@ namespace PawnSkillsReimagined
                 return false;
             }
             return record.levelInt > comp.GetOrInitDecayFloor(record.Pawn, record);
+        }
+
+        // Vanilla's decay switch (in Interval) only covers levels 10-20, so skills
+        // we've allowed past 20 never decay. Extend it above 20 here, continuing the
+        // top-end slope (level 20 loses 12 xp/interval; +4 per level beyond). Routed
+        // through Learn(-x), so the Learn prefix's floor logic still applies. Only
+        // active when dual-level + decay are enabled; runs on the cold 200-tick path.
+        public static void Interval_Postfix(SkillRecord __instance)
+        {
+            var settings = PawnSkillsReimaginedMod.Settings;
+            if (!settings.skillsLevelNormally || !settings.enableSkillDecay)
+            {
+                return;
+            }
+            int level = __instance.levelInt;
+            if (level <= 20)
+            {
+                return; // vanilla's own switch already handled 10-20
+            }
+            Pawn pawn = __instance.Pawn;
+            if (pawn?.story?.traits == null)
+            {
+                return;
+            }
+            // Mirror vanilla's memory guards: Perfect Memory blocks decay, Great
+            // Memory halves it.
+            if (ModsConfig.AnomalyActive && pawn.story.traits.HasTrait(TraitDefOf.PerfectMemory))
+            {
+                return;
+            }
+            float memory = pawn.story.traits.HasTrait(TraitDefOf.GreatMemory) ? 0.5f : 1f;
+            __instance.Learn(-(12f + 4f * (level - 20)) * memory);
         }
 
         // Lift Learn's own level cap. Its level-up section hardcodes 20 three times
