@@ -24,10 +24,15 @@ namespace PawnSkillsReimagined
         private static readonly Color Gold = new Color(1f, 0.85f, 0.3f);
 
         private const float RowHeight = 28f;
+        private const float BaseWidth = 480f;
+
+        // When true, the tab widens and draws VSE's expertise selection panel in
+        // the extra region on the right (a drawer for acquiring new expertise).
+        private bool expertiseExpanded;
 
         public ITab_SkillPoints()
         {
-            size = new Vector2(480f, 560f);
+            size = new Vector2(BaseWidth, 560f);
             labelKey = "PSR_TabSkills";
         }
 
@@ -91,7 +96,12 @@ namespace PawnSkillsReimagined
                 pendingFor = pawn;
             }
 
-            Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(12f);
+            // Widen the tab when the expertise drawer is open; the main content
+            // stays at BaseWidth and VSE's panel fills the extra region.
+            float panelW = expertiseExpanded ? Mathf.Max(340f, ExpertiseUIUtility.ExpertisePanelSize(pawn).x) : 0f;
+            size.x = BaseWidth + panelW;
+
+            Rect rect = new Rect(0f, 0f, BaseWidth, size.y).ContractedBy(12f);
             PawnProgress p = comp.For(pawn);
             int maxLevel = PawnSkillsReimaginedGameComponent.MaxLevel;
             int maxSkill = PawnSkillsReimaginedMod.Settings.maxSkillLevel;
@@ -101,9 +111,24 @@ namespace PawnSkillsReimagined
 
             // Header: level + XP bar + points
             Text.Font = GameFont.Medium;
-            Widgets.Label(new Rect(rect.x, rect.y, rect.width, 30f),
+            Widgets.Label(new Rect(rect.x, rect.y, rect.width - 118f, 30f),
                 pawn.LabelShortCap + " — Level " + p.level + (p.level >= maxLevel ? " (MAX)" : ""));
             Text.Font = GameFont.Small;
+
+            // Expertise drawer toggle (top-right of the main content).
+            Rect toggleRect = new Rect(rect.xMax - 112f, rect.y + 2f, 112f, 26f);
+            if (Widgets.ButtonText(toggleRect, expertiseExpanded ? "« Expertise" : "Expertise »"))
+            {
+                expertiseExpanded = !expertiseExpanded;
+            }
+            if (expertiseExpanded)
+            {
+                Widgets.DrawLineVertical(BaseWidth, 8f, size.y - 16f);
+                GUI.color = Color.white;
+                Text.Font = GameFont.Small;
+                Text.Anchor = TextAnchor.UpperLeft;
+                ExpertiseUIUtility.DoExpertisePanel(new Rect(BaseWidth, 0f, panelW, size.y).ContractedBy(12f), pawn);
+            }
 
             Rect xpBar = new Rect(rect.x, rect.y + 32f, rect.width, 14f);
             if (p.level >= maxLevel)
