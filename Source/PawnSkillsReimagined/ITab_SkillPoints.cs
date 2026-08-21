@@ -4,6 +4,7 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using VSE;
+using VSE.Expertise;
 using VSE.Passions;
 
 namespace PawnSkillsReimagined
@@ -26,9 +27,10 @@ namespace PawnSkillsReimagined
         private const float RowHeight = 28f;
         private const float BaseWidth = 480f;
 
-        // When true, the tab widens and draws VSE's expertise selection panel in
-        // the extra region on the right (a drawer for acquiring new expertise).
+        // When true, the tab widens and draws our acquire-expertise panel in the
+        // extra region on the right (a drawer for picking up new expertise).
         private bool expertiseExpanded;
+        private Vector2 acquireScroll;
 
         public ITab_SkillPoints()
         {
@@ -97,8 +99,8 @@ namespace PawnSkillsReimagined
             }
 
             // Widen the tab when the expertise drawer is open; the main content
-            // stays at BaseWidth and VSE's panel fills the extra region.
-            float panelW = expertiseExpanded ? Mathf.Max(340f, ExpertiseUIUtility.ExpertisePanelSize(pawn).x) : 0f;
+            // stays at BaseWidth and our acquire panel fills the extra region.
+            float panelW = expertiseExpanded ? 360f : 0f;
             size.x = BaseWidth + panelW;
 
             Rect rect = new Rect(0f, 0f, BaseWidth, size.y).ContractedBy(12f);
@@ -124,10 +126,7 @@ namespace PawnSkillsReimagined
             if (expertiseExpanded)
             {
                 Widgets.DrawLineVertical(BaseWidth, 8f, size.y - 16f);
-                GUI.color = Color.white;
-                Text.Font = GameFont.Small;
-                Text.Anchor = TextAnchor.UpperLeft;
-                ExpertiseUIUtility.DoExpertisePanel(new Rect(BaseWidth, 0f, panelW, size.y).ContractedBy(12f), pawn);
+                DrawAcquirePanel(new Rect(BaseWidth, 0f, panelW, size.y).ContractedBy(12f), pawn, canSpend);
             }
 
             Rect xpBar = new Rect(rect.x, rect.y + 32f, rect.width, 14f);
@@ -374,6 +373,93 @@ namespace PawnSkillsReimagined
             }
             pendingSkills.Clear();
             pendingExpertise.Clear();
+        }
+
+        // Our own "acquire new expertise" drawer. Redrawn rather than reusing VSE's
+        // DoExpertisePanel (which bakes in a redundant close button), but it uses
+        // VSE's data + gating so our slot-cap / overlap / acquire-level overrides
+        // apply. Acquiring is free (slot-limited); leveling is done with expertise
+        // points in the main panel.
+        private void DrawAcquirePanel(Rect inRect, Pawn pawn, bool canSpend)
+        {
+            ExpertiseTracker tracker = pawn.Expertise();
+            if (tracker == null || pawn.skills == null)
+            {
+                return;
+            }
+
+            Text.Font = GameFont.Small;
+            Text.Anchor = TextAnchor.UpperLeft;
+            GUI.color = Gold;
+            Widgets.Label(new Rect(inRect.x, inRect.y, inRect.width, 24f), "Acquire expertise");
+            GUI.color = Color.white;
+            inRect.yMin += 28f;
+
+            var owned = new HashSet<ExpertiseDef>();
+            foreach (ExpertiseRecord er in tracker.AllExpertise)
+            {
+                owned.Add(er.def);
+            }
+            List<ExpertiseDef> defs = new List<ExpertiseDef>();
+            foreach (ExpertiseDef def in DefDatabase<ExpertiseDef>.AllDefs)
+            {
+                if (!def.hide && !owned.Contains(def))
+                {
+                    defs.Add(def);
+                }
+            }
+            // Eligible first, then by the pawn's level in that skill.
+            defs.Sort((a, b) =>
+            {
+                bool ca = a.CanApplyOn(pawn, out _);
+                bool cb = b.CanApplyOn(pawn, out _);
+                if (ca != cb) return cb.CompareTo(ca);
+                return pawn.skills.GetSkill(b.skill).levelInt.CompareTo(pawn.skills.GetSkill(a.skill).levelInt);
+            });
+
+            Rect view = new Rect(0f, 0f, inRect.width - 18f, defs.Count * 58f);
+            Widgets.BeginScrollView(inRect, ref acquireScroll, view);
+            float y = 0f;
+            const float btnW = 96f;
+            foreach (ExpertiseDef def in defs)
+            {
+                Rect row = new Rect(0f, y, view.width, 54f);
+                Widgets.DrawMenuSection(row);
+                Rect body = row.ContractedBy(6f);
+
+                Text.Anchor = TextAnchor.UpperLeft;
+                Widgets.Label(new Rect(body.x, body.y, body.width - btnW - 6f, 22f), def.LabelCap);
+                GUI.color = new Color(0.62f, 0.62f, 0.62f);
+                Text.Font = GameFont.Tiny;
+                Widgets.Label(new Rect(body.x, body.y + 20f, body.width - btnW - 6f, 16f),
+                    def.skill?.skillLabel.CapitalizeFirst() ?? "");
+                Text.Font = GameFont.Small;
+                GUI.color = Color.white;
+
+                Rect btn = new Rect(body.xMax - btnW, body.y + (body.height - 28f) / 2f, btnW, 28f);
+                bool can = def.CanApplyOn(pawn, out string reason);
+                if (can && canSpend && Widgets.ButtonText(btn, "VSE.SelectExpertise".Translate()))
+                {
+                    tracker.AddExpertise(def);
+                    SoundDefOf.Tick_High.PlayOneShotOnCamera();
+                }
+                else if (!can || !canSpend)
+                {
+                    GUI.color = Color.gray;
+                    Widgets.ButtonText(btn, "VSE.SelectExpertise".Translate(), active: false);
+                    GUI.color = Color.white;
+                }
+
+                string tip = def.description + "\n\n" + "VSE.Effects.PerLevel".Translate() + def.Effects(1, "  - ");
+                if (!can)
+                {
+                    tip = reason + "\n\n" + tip;
+                }
+                TooltipHandler.TipRegion(row, tip);
+                y += 58f;
+            }
+            Widgets.EndScrollView();
+            Text.Anchor = TextAnchor.UpperLeft;
         }
     }
 }
