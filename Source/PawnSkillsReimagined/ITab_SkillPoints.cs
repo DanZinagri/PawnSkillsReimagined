@@ -417,26 +417,38 @@ namespace PawnSkillsReimagined
                 return pawn.skills.GetSkill(b.skill).levelInt.CompareTo(pawn.skills.GetSkill(a.skill).levelInt);
             });
 
-            Rect view = new Rect(0f, 0f, inRect.width - 18f, defs.Count * 58f);
+            const float btnW = 132f;
+            float bodyW = inRect.width - 30f; // row inner width, for wrapping the effects text
+
+            // Pre-measure each row so the per-level effects fit inline below the name.
+            string[] effects = new string[defs.Count];
+            float[] rowH = new float[defs.Count];
+            float total = 0f;
+            Text.Font = GameFont.Tiny;
+            for (int i = 0; i < defs.Count; i++)
+            {
+                effects[i] = defs[i].Effects(1, "  - ").TrimStart('\n');
+                float effH = effects[i].NullOrEmpty() ? 0f : Text.CalcHeight(effects[i], bodyW);
+                rowH[i] = 28f + effH + 10f;
+                total += rowH[i] + 4f;
+            }
+            Text.Font = GameFont.Small;
+
+            Rect view = new Rect(0f, 0f, inRect.width - 18f, Mathf.Max(total, inRect.height));
             Widgets.BeginScrollView(inRect, ref acquireScroll, view);
             float y = 0f;
-            const float btnW = 96f;
-            foreach (ExpertiseDef def in defs)
+            for (int i = 0; i < defs.Count; i++)
             {
-                Rect row = new Rect(0f, y, view.width, 54f);
+                ExpertiseDef def = defs[i];
+                Rect row = new Rect(0f, y, view.width, rowH[i]);
                 Widgets.DrawMenuSection(row);
                 Rect body = row.ContractedBy(6f);
 
+                Text.Font = GameFont.Small;
                 Text.Anchor = TextAnchor.UpperLeft;
                 Widgets.Label(new Rect(body.x, body.y, body.width - btnW - 6f, 22f), def.LabelCap);
-                GUI.color = new Color(0.62f, 0.62f, 0.62f);
-                Text.Font = GameFont.Tiny;
-                Widgets.Label(new Rect(body.x, body.y + 20f, body.width - btnW - 6f, 16f),
-                    def.skill?.skillLabel.CapitalizeFirst() ?? "");
-                Text.Font = GameFont.Small;
-                GUI.color = Color.white;
 
-                Rect btn = new Rect(body.xMax - btnW, body.y + (body.height - 28f) / 2f, btnW, 28f);
+                Rect btn = new Rect(body.xMax - btnW, body.y, btnW, 26f);
                 bool can = def.CanApplyOn(pawn, out string reason);
                 if (can && canSpend && Widgets.ButtonText(btn, "VSE.SelectExpertise".Translate()))
                 {
@@ -450,13 +462,18 @@ namespace PawnSkillsReimagined
                     GUI.color = Color.white;
                 }
 
-                string tip = def.description + "\n\n" + "VSE.Effects.PerLevel".Translate() + def.Effects(1, "  - ");
-                if (!can)
+                if (!effects[i].NullOrEmpty())
                 {
-                    tip = reason + "\n\n" + tip;
+                    GUI.color = new Color(0.68f, 0.68f, 0.68f);
+                    Text.Font = GameFont.Tiny;
+                    Widgets.Label(new Rect(body.x, body.y + 26f, body.width, body.height - 26f), effects[i]);
+                    Text.Font = GameFont.Small;
+                    GUI.color = Color.white;
                 }
+
+                string tip = can ? def.description : reason + "\n\n" + def.description;
                 TooltipHandler.TipRegion(row, tip);
-                y += 58f;
+                y += rowH[i] + 4f;
             }
             Widgets.EndScrollView();
             Text.Anchor = TextAnchor.UpperLeft;
