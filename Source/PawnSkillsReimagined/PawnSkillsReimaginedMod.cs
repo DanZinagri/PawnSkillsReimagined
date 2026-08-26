@@ -399,7 +399,7 @@ namespace PawnSkillsReimagined
         public int qualityVanillaCapLevel = 80;              // skill level where crafting quality reaches vanilla's level-20 ceiling
         public float xpConversionRate = 1f;                   // skill XP -> pawn level XP multiplier
         public float xpRequirementMultiplier = 1f;            // scales XP needed per level
-        public bool skillsLevelNormally = false;              // on = funneled XP also levels the skill itself (vanilla-style)
+        public bool skillsLevelNormally = true;              // on = funneled XP also levels the skill itself (vanilla-style)
         public bool enableSkillDecay = false;                 // (dual-level only) allow skill decay down to each skill's committed floor
         public bool radiusUIStyle = true;                     // when Radius UI is installed, draw our buttons in its style
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
