@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -21,8 +21,9 @@ namespace PawnSkillsReimagined
         private readonly Dictionary<ExpertiseRecord, int> pendingExpertise = new Dictionary<ExpertiseRecord, int>();
         private Pawn pendingFor;
 
-        private static readonly Color PendingGreen = new Color(0.5f, 0.9f, 0.5f);
-        private static readonly Color Gold = new Color(1f, 0.85f, 0.3f);
+        // Colours come from the active UI style (vanilla or a restyle provider).
+        private static Color PendingGreen => UIStyle.Positive;
+        private static Color Gold => UIStyle.Accent;
 
         private const float RowHeight = 28f;
         private const float BaseWidth = 480f;
@@ -110,6 +111,7 @@ namespace PawnSkillsReimagined
             int available = comp.AvailableFor(pawn) - PendingSkillTotal();
             int availableExpertise = comp.AvailableExpertisePoints(pawn) - PendingExpertiseTotal();
             bool canSpend = (pawn.Faction == Faction.OfPlayerSilentFail || pawn.IsPrisonerOfColony) && !pawn.Dead;
+            IUIStyle style = UIStyle.Current;
 
             // Header: level + XP bar + points
             Text.Font = GameFont.Medium;
@@ -119,26 +121,33 @@ namespace PawnSkillsReimagined
 
             // Expertise drawer toggle (top-right of the main content).
             Rect toggleRect = new Rect(rect.xMax - 112f, rect.y + 2f, 112f, 26f);
-            if (Widgets.ButtonText(toggleRect, expertiseExpanded ? "« Expertise" : "Expertise »"))
+            if (UIStyle.Button(toggleRect, expertiseExpanded ? "« Expertise" : "Expertise »"))
             {
                 expertiseExpanded = !expertiseExpanded;
             }
             if (expertiseExpanded)
             {
+                Color prevDiv = GUI.color;
+                GUI.color = UIStyle.Divider;
                 Widgets.DrawLineVertical(BaseWidth, 8f, size.y - 16f);
+                GUI.color = prevDiv;
                 DrawAcquirePanel(new Rect(BaseWidth, 0f, panelW, size.y).ContractedBy(12f), pawn, canSpend);
             }
 
             Rect xpBar = new Rect(rect.x, rect.y + 32f, rect.width, 14f);
             if (p.level >= maxLevel)
             {
-                Widgets.FillableBar(xpBar, 1f);
+                UIStyle.Bar(xpBar, 1f);
             }
             else
             {
                 float required = PawnSkillsReimaginedGameComponent.XpToNext(p.level);
-                Widgets.FillableBar(xpBar, Mathf.Clamp01(p.xp / required));
-                TooltipHandler.TipRegion(xpBar, p.xp.ToString("F0") + " / " + required.ToString("F0") + " XP to next level");
+                UIStyle.Bar(xpBar, p.xp / required);
+                if (Mouse.IsOver(xpBar))
+                {
+                    TooltipHandler.TipRegion(xpBar,
+                        p.xp.ToString("F0") + " / " + required.ToString("F0") + " XP to next level");
+                }
             }
 
             GUI.color = available > 0 ? Gold : Color.gray;
@@ -162,7 +171,8 @@ namespace PawnSkillsReimagined
             float y = 0f;
             foreach (SkillRecord record in skills)
             {
-                DrawSkillRow(new Rect(0f, y, viewRect.width, RowHeight), record, canSpend, ref available, maxSkill);
+                DrawSkillRow(new Rect(0f, y, viewRect.width, RowHeight), record, canSpend, ref available, maxSkill,
+                    style);
                 y += RowHeight;
             }
 
@@ -177,7 +187,8 @@ namespace PawnSkillsReimagined
                 y += RowHeight;
                 foreach (ExpertiseRecord record in expertise)
                 {
-                    DrawExpertiseRow(new Rect(0f, y, viewRect.width, RowHeight), record, canSpend, ref availableExpertise);
+                    DrawExpertiseRow(new Rect(0f, y, viewRect.width, RowHeight), record, canSpend, ref availableExpertise,
+                        style);
                     y += RowHeight;
                 }
             }
@@ -189,12 +200,12 @@ namespace PawnSkillsReimagined
             float btnY = rect.yMax - bottomButtons - 18f;
             if (anyPending)
             {
-                if (Widgets.ButtonText(new Rect(rect.x, btnY, 130f, 32f), "Apply"))
+                if (UIStyle.Button(new Rect(rect.x, btnY, 130f, 32f), "Apply"))
                 {
                     ApplyPending(pawn, comp);
                     SoundDefOf.ExecuteTrade.PlayOneShotOnCamera();
                 }
-                if (Widgets.ButtonText(new Rect(rect.x + 140f, btnY, 130f, 32f), "Cancel"))
+                if (UIStyle.Button(new Rect(rect.x + 140f, btnY, 130f, 32f), "Cancel"))
                 {
                     pendingSkills.Clear();
                     pendingExpertise.Clear();
@@ -210,7 +221,8 @@ namespace PawnSkillsReimagined
             Text.Font = GameFont.Small;
         }
 
-        private void DrawSkillRow(Rect row, SkillRecord record, bool canSpend, ref int available, int maxSkill)
+        private void DrawSkillRow(Rect row, SkillRecord record, bool canSpend, ref int available, int maxSkill,
+            IUIStyle style)
         {
             if (Mouse.IsOver(row))
             {
@@ -234,7 +246,7 @@ namespace PawnSkillsReimagined
 
             GUI.color = disabled ? new Color(1f, 1f, 1f, 0.4f) : Color.white;
             Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(new Rect(32f, row.y, 128f, row.height), record.def.skillLabel.CapitalizeFirst());
+            Widgets.Label(new Rect(32f, row.y, 128f, row.height), SkillLabel(record.def));
 
             Rect levelRect = new Rect(164f, row.y, 110f, row.height);
             if (disabled)
@@ -244,19 +256,29 @@ namespace PawnSkillsReimagined
             }
             else
             {
-                // Rich text so the aptitude offset stays visually distinct from
-                // the (green) pending change and never reads as a bought rank.
                 GUI.color = Color.white;
-                string basePart = pending > 0 ? baseLevel + " → " + shownBase : baseLevel.ToString();
-                string text = "<color=#" + ColorUtility.ToHtmlStringRGB(pending > 0 ? PendingGreen : Color.white) +
-                              ">" + basePart + "</color>";
-                if (aptitude != 0)
+                if (pending == 0 && aptitude == 0)
                 {
-                    Color aptColor = aptitude > 0 ? new Color(0.55f, 0.8f, 1f) : new Color(1f, 0.55f, 0.55f);
-                    text += " <color=#" + ColorUtility.ToHtmlStringRGB(aptColor) + ">(" +
-                            aptitude.ToStringWithSign() + ")</color>";
+                    // Common case: no markup needed, so skip the colour-hex and
+                    // string building this would otherwise redo every frame.
+                    Widgets.Label(levelRect, baseLevel.ToString());
                 }
-                Widgets.Label(levelRect, text);
+                else
+                {
+                    // Rich text so the aptitude offset stays visually distinct from
+                    // the (green) pending change and never reads as a bought rank.
+                    string basePart = pending > 0 ? baseLevel + " → " + shownBase : baseLevel.ToString();
+                    string text = pending > 0
+                        ? "<color=#" + ColorUtility.ToHtmlStringRGB(PendingGreen) + ">" + basePart + "</color>"
+                        : basePart;
+                    if (aptitude != 0)
+                    {
+                        Color aptColor = aptitude > 0 ? new Color(0.55f, 0.8f, 1f) : new Color(1f, 0.55f, 0.55f);
+                        text += " <color=#" + ColorUtility.ToHtmlStringRGB(aptColor) + ">(" +
+                                aptitude.ToStringWithSign() + ")</color>";
+                    }
+                    Widgets.Label(levelRect, text);
+                }
             }
             GUI.color = Color.white;
             Text.Anchor = TextAnchor.UpperLeft;
@@ -269,11 +291,11 @@ namespace PawnSkillsReimagined
             // Minus reduces the pending queue; plus queues a rank at this cost.
             float btnY = row.y + 2f;
             Rect minusRect = new Rect(row.width - 96f, btnY, 24f, 24f);
-            if (pending > 0)
+            if (pending > 0 && Mouse.IsOver(minusRect))
             {
                 TooltipHandler.TipRegion(minusRect, "Un-queue 1 rank.\nShift-click: up to 5.");
             }
-            if (pending > 0 && Widgets.ButtonText(minusRect, "-"))
+            if (pending > 0 && style.Button(minusRect, "-", true, null))
             {
                 int toRemove = Event.current.shift ? Mathf.Min(5, pending) : 1;
                 pendingSkills[record] = pending - toRemove;
@@ -287,10 +309,15 @@ namespace PawnSkillsReimagined
             int nextCost = PointCosts.CostAtLevel(record, Mathf.Max(0, record.levelInt) + pending);
             bool canQueue = available >= nextCost && shownBase < maxSkill;
             Rect plusRect = new Rect(row.width - 68f, btnY, 64f, 24f);
-            TooltipHandler.TipRegion(plusRect,
-                "Queue +1 rank for " + nextCost + " points (" + (passion?.label ?? "no passion") +
-                ").\nShift-click: +5 ranks.");
-            if (Widgets.ButtonText(plusRect, "+ (" + nextCost + ")", active: canQueue) && canQueue)
+            // Built only while hovered - this concatenation was running for
+            // every row every frame.
+            if (Mouse.IsOver(plusRect))
+            {
+                TooltipHandler.TipRegion(plusRect,
+                    "Queue +1 rank for " + nextCost + " points (" + (passion?.label ?? "no passion") +
+                    ").\nShift-click: +5 ranks.");
+            }
+            if (style.Button(plusRect, PlusLabel(nextCost), canQueue, null) && canQueue)
             {
                 int toQueue = Event.current.shift ? 5 : 1;
                 for (int i = 0; i < toQueue; i++)
@@ -308,7 +335,8 @@ namespace PawnSkillsReimagined
             }
         }
 
-        private void DrawExpertiseRow(Rect row, ExpertiseRecord record, bool canSpend, ref int availableExpertise)
+        private void DrawExpertiseRow(Rect row, ExpertiseRecord record, bool canSpend, ref int availableExpertise,
+            IUIStyle style)
         {
             if (Mouse.IsOver(row))
             {
@@ -331,7 +359,7 @@ namespace PawnSkillsReimagined
                 return;
             }
             float btnY = row.y + 2f;
-            if (pending > 0 && Widgets.ButtonText(new Rect(row.width - 96f, btnY, 24f, 24f), "-"))
+            if (pending > 0 && style.Button(new Rect(row.width - 96f, btnY, 24f, 24f), "-", true, null))
             {
                 pendingExpertise[record] = pending - 1;
                 if (pendingExpertise[record] <= 0)
@@ -341,7 +369,7 @@ namespace PawnSkillsReimagined
             }
             // One expertise point raises one expertise level.
             bool canQueue = availableExpertise >= 1 && !maxed;
-            if (Widgets.ButtonText(new Rect(row.width - 68f, btnY, 64f, 24f), "+ (1)", active: canQueue) && canQueue)
+            if (style.Button(new Rect(row.width - 68f, btnY, 64f, 24f), "+ (1)", canQueue, null) && canQueue)
             {
                 pendingExpertise[record] = pending + 1;
                 availableExpertise -= 1;
@@ -373,6 +401,7 @@ namespace PawnSkillsReimagined
             }
             pendingSkills.Clear();
             pendingExpertise.Clear();
+            acquireFor = null; // spent ranks can change expertise eligibility
         }
 
         // Our own "acquire new expertise" drawer. Redrawn rather than reusing VSE's
@@ -380,6 +409,129 @@ namespace PawnSkillsReimagined
         // VSE's data + gating so our slot-cap / overlap / acquire-level overrides
         // apply. Acquiring is free (slot-limited); leveling is done with expertise
         // points in the main panel.
+        private struct AcquireRow
+        {
+            public ExpertiseDef def;
+            public bool can;
+            public string tip;
+            public string effects;
+            public float height;
+        }
+
+        // Cached row model for the acquire drawer. Building it walks every expertise
+        // def and calls VSE's CanApplyOn plus Effects() (a LINQ string build) and
+        // Text.CalcHeight - far too expensive to redo every frame. It is rebuilt
+        // only when the pawn, its expertise count or the panel width changes, plus a
+        // periodic refresh so skill/level drift is picked up while the tab is open.
+        private readonly List<AcquireRow> acquireRows = new List<AcquireRow>();
+        private Pawn acquireFor;
+        private int acquireOwned = -1;
+        private int acquireFrame = -1;
+        private float acquireWidth = -1f;
+        private float acquireTotal;
+        private const int AcquireRefreshFrames = 30;
+
+        // Effects text depends only on the def, so it is built once and shared
+        // across pawns rather than rebuilt per row per frame. It does depend on
+        // VSE's stat multiplier, so a settings write clears it (see
+        // InvalidateCaches) and bumps the generation to force a row rebuild.
+        private static readonly Dictionary<ExpertiseDef, string> EffectsText =
+            new Dictionary<ExpertiseDef, string>();
+        private static int cacheGeneration;
+        private int builtGeneration = -1;
+
+        // Small string caches: these were rebuilt for every row every frame. Both
+        // are keyed by values that fully determine the text, so they never go stale
+        // (a changed cost simply lands on a different key).
+        private static readonly Dictionary<SkillDef, string> SkillLabels =
+            new Dictionary<SkillDef, string>();
+        private static readonly Dictionary<int, string> PlusLabels = new Dictionary<int, string>();
+
+        private static string SkillLabel(SkillDef def)
+        {
+            if (!SkillLabels.TryGetValue(def, out string label))
+            {
+                label = def.skillLabel.CapitalizeFirst();
+                SkillLabels[def] = label;
+            }
+            return label;
+        }
+
+        private static string PlusLabel(int cost)
+        {
+            if (!PlusLabels.TryGetValue(cost, out string label))
+            {
+                label = "+ (" + cost + ")";
+                PlusLabels[cost] = label;
+            }
+            return label;
+        }
+
+        // Called when any mod's settings window closes.
+        public static void InvalidateCaches()
+        {
+            EffectsText.Clear();
+            cacheGeneration++;
+        }
+
+        private void RebuildAcquireRows(Pawn pawn, ExpertiseTracker tracker, float bodyW)
+        {
+            acquireRows.Clear();
+            var owned = new HashSet<ExpertiseDef>();
+            foreach (ExpertiseRecord er in tracker.AllExpertise)
+            {
+                owned.Add(er.def);
+            }
+
+            Text.Font = GameFont.Tiny;
+            foreach (ExpertiseDef def in DefDatabase<ExpertiseDef>.AllDefs)
+            {
+                if (def.hide || owned.Contains(def))
+                {
+                    continue;
+                }
+                if (!EffectsText.TryGetValue(def, out string effects))
+                {
+                    effects = def.Effects(1, "  - ").TrimStart('\n');
+                    EffectsText[def] = effects;
+                }
+                bool can = def.CanApplyOn(pawn, out string reason);
+                acquireRows.Add(new AcquireRow
+                {
+                    def = def,
+                    can = can,
+                    tip = can ? def.description : reason + "\n\n" + def.description,
+                    effects = effects,
+                    height = 28f + (effects.NullOrEmpty() ? 0f : Text.CalcHeight(effects, bodyW)) + 10f,
+                });
+            }
+            Text.Font = GameFont.Small;
+
+            // Eligible first, then by the pawn's level in that skill. Sorts on the
+            // values captured above, so CanApplyOn isn't re-run per comparison.
+            acquireRows.Sort((a, b) =>
+            {
+                if (a.can != b.can)
+                {
+                    return b.can.CompareTo(a.can);
+                }
+                return pawn.skills.GetSkill(b.def.skill).levelInt
+                    .CompareTo(pawn.skills.GetSkill(a.def.skill).levelInt);
+            });
+
+            acquireTotal = 0f;
+            for (int i = 0; i < acquireRows.Count; i++)
+            {
+                acquireTotal += acquireRows[i].height + 4f;
+            }
+
+            acquireFor = pawn;
+            acquireOwned = tracker.AllExpertise.Count;
+            acquireWidth = bodyW;
+            acquireFrame = Time.frameCount;
+            builtGeneration = cacheGeneration;
+        }
+
         private void DrawAcquirePanel(Rect inRect, Pawn pawn, bool canSpend)
         {
             ExpertiseTracker tracker = pawn.Expertise();
@@ -395,85 +547,66 @@ namespace PawnSkillsReimagined
             GUI.color = Color.white;
             inRect.yMin += 28f;
 
-            var owned = new HashSet<ExpertiseDef>();
-            foreach (ExpertiseRecord er in tracker.AllExpertise)
-            {
-                owned.Add(er.def);
-            }
-            List<ExpertiseDef> defs = new List<ExpertiseDef>();
-            foreach (ExpertiseDef def in DefDatabase<ExpertiseDef>.AllDefs)
-            {
-                if (!def.hide && !owned.Contains(def))
-                {
-                    defs.Add(def);
-                }
-            }
-            // Eligible first, then by the pawn's level in that skill.
-            defs.Sort((a, b) =>
-            {
-                bool ca = a.CanApplyOn(pawn, out _);
-                bool cb = b.CanApplyOn(pawn, out _);
-                if (ca != cb) return cb.CompareTo(ca);
-                return pawn.skills.GetSkill(b.skill).levelInt.CompareTo(pawn.skills.GetSkill(a.skill).levelInt);
-            });
-
             const float btnW = 132f;
-            float bodyW = inRect.width - 30f; // row inner width, for wrapping the effects text
-
-            // Pre-measure each row so the per-level effects fit inline below the name.
-            string[] effects = new string[defs.Count];
-            float[] rowH = new float[defs.Count];
-            float total = 0f;
-            Text.Font = GameFont.Tiny;
-            for (int i = 0; i < defs.Count; i++)
+            float bodyW = inRect.width - 30f;
+            if (acquireFor != pawn || acquireOwned != tracker.AllExpertise.Count ||
+                !Mathf.Approximately(acquireWidth, bodyW) ||
+                builtGeneration != cacheGeneration ||
+                Time.frameCount - acquireFrame > AcquireRefreshFrames)
             {
-                effects[i] = defs[i].Effects(1, "  - ").TrimStart('\n');
-                float effH = effects[i].NullOrEmpty() ? 0f : Text.CalcHeight(effects[i], bodyW);
-                rowH[i] = 28f + effH + 10f;
-                total += rowH[i] + 4f;
+                RebuildAcquireRows(pawn, tracker, bodyW);
             }
-            Text.Font = GameFont.Small;
 
-            Rect view = new Rect(0f, 0f, inRect.width - 18f, Mathf.Max(total, inRect.height));
+            IUIStyle style = UIStyle.Current;
+            string selectLabel = "VSE.SelectExpertise".Translate();
+            Rect view = new Rect(0f, 0f, inRect.width - 18f, Mathf.Max(acquireTotal, inRect.height));
             Widgets.BeginScrollView(inRect, ref acquireScroll, view);
+
+            // Only rows inside the visible scroll window are drawn; the list is far
+            // taller than the panel, so this skips most of the per-row work.
+            float top = acquireScroll.y - 8f;
+            float bottom = acquireScroll.y + inRect.height + 8f;
             float y = 0f;
-            for (int i = 0; i < defs.Count; i++)
+            for (int i = 0; i < acquireRows.Count; i++)
             {
-                ExpertiseDef def = defs[i];
-                Rect row = new Rect(0f, y, view.width, rowH[i]);
-                Widgets.DrawMenuSection(row);
-                Rect body = row.ContractedBy(6f);
-
-                Text.Font = GameFont.Small;
-                Text.Anchor = TextAnchor.UpperLeft;
-                Widgets.Label(new Rect(body.x, body.y, body.width - btnW - 6f, 22f), def.LabelCap);
-
-                Rect btn = new Rect(body.xMax - btnW, body.y, btnW, 26f);
-                bool can = def.CanApplyOn(pawn, out string reason);
-                if (can && canSpend && Widgets.ButtonText(btn, "VSE.SelectExpertise".Translate()))
+                AcquireRow r = acquireRows[i];
+                if (y > bottom)
                 {
-                    tracker.AddExpertise(def);
-                    SoundDefOf.Tick_High.PlayOneShotOnCamera();
+                    break; // rows are in order, so nothing below is visible
                 }
-                else if (!can || !canSpend)
+                if (y + r.height >= top)
                 {
-                    GUI.color = Color.gray;
-                    Widgets.ButtonText(btn, "VSE.SelectExpertise".Translate(), active: false);
-                    GUI.color = Color.white;
-                }
+                    Rect row = new Rect(0f, y, view.width, r.height);
+                    style.Card(row, Mouse.IsOver(row));
+                    Rect body = row.ContractedBy(6f);
 
-                if (!effects[i].NullOrEmpty())
-                {
-                    GUI.color = new Color(0.68f, 0.68f, 0.68f);
-                    Text.Font = GameFont.Tiny;
-                    Widgets.Label(new Rect(body.x, body.y + 26f, body.width, body.height - 26f), effects[i]);
                     Text.Font = GameFont.Small;
-                    GUI.color = Color.white;
-                }
+                    Widgets.Label(new Rect(body.x, body.y, body.width - btnW - 6f, 22f), r.def.LabelCap);
 
-                string tip = can ? def.description : reason + "\n\n" + def.description;
-                TooltipHandler.TipRegion(row, tip);
-                y += rowH[i] + 4f;
+                    Rect btn = new Rect(body.xMax - btnW, body.y, btnW, 26f);
+                    bool enabled = r.can && canSpend;
+                    if (style.Button(btn, selectLabel, enabled, null) && enabled)
+                    {
+                        tracker.AddExpertise(r.def);
+                        SoundDefOf.Tick_High.PlayOneShotOnCamera();
+                        acquireFor = null; // rebuild next frame
+                    }
+
+                    if (!r.effects.NullOrEmpty())
+                    {
+                        GUI.color = style.Dim;
+                        Text.Font = GameFont.Tiny;
+                        Widgets.Label(new Rect(body.x, body.y + 26f, body.width, body.height - 26f), r.effects);
+                        Text.Font = GameFont.Small;
+                        GUI.color = Color.white;
+                    }
+
+                    if (Mouse.IsOver(row))
+                    {
+                        TooltipHandler.TipRegion(row, r.tip);
+                    }
+                }
+                y += r.height + 4f;
             }
             Widgets.EndScrollView();
             Text.Anchor = TextAnchor.UpperLeft;

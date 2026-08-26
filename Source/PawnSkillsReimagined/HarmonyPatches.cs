@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
@@ -83,10 +83,21 @@ namespace PawnSkillsReimagined
                 AccessTools.Method(typeof(SkillUI), "GetSkillDescription"),
                 postfix: new HarmonyMethod(self, nameof(GetSkillDescription_Postfix)));
 
+            // Cached UI text (expertise effect strings) depends on other mods'
+            // settings, so drop it whenever a settings window is closed.
+            harmony.Patch(
+                AccessTools.Method(typeof(Dialog_ModSettings), "PreClose"),
+                postfix: new HarmonyMethod(self, nameof(ModSettingsClosed_Postfix)));
+
             CharacterDevelopmentCompat.PatchRewardCap(harmony);
             ExpertiseUnlockCompat.Patch(harmony);
 
             InjectSkillPointsTab();
+        }
+
+        public static void ModSettingsClosed_Postfix()
+        {
+            ITab_SkillPoints.InvalidateCaches();
         }
 
         // --------------------------------------------------------------------
