@@ -1,4 +1,4 @@
-using LudeonTK;
+﻿using LudeonTK;
 using RimWorld;
 using Verse;
 
@@ -49,6 +49,29 @@ namespace PawnSkillsReimagined
         [DebugAction(Category, "Expertise points: -5", actionType = PerPawn, allowedGameStates = OnMap)]
         private static void RemoveFiveExpertisePoints(Pawn p) => ApplyExpertise(p, comp => comp.AddExpertisePoints(p, -5));
 
+        [DebugAction(Category, "Respec points: +1", actionType = PerPawn, allowedGameStates = OnMap)]
+        private static void AddRespecPoint(Pawn p) => ApplyRespec(p, comp => comp.AddRespecPoints(p, 1));
+
+        [DebugAction(Category, "Respec points: -1", actionType = PerPawn, allowedGameStates = OnMap)]
+        private static void RemoveRespecPoint(Pawn p) => ApplyRespec(p, comp => comp.AddRespecPoints(p, -1));
+
+        // Refunds spends made before purchase tracking existed (mod updated
+        // mid-save); capped by the pawn's untracked spent points. Free.
+        [DebugAction(Category, "Legacy respec (pre-update spends)", actionType = PerPawn, allowedGameStates = OnMap)]
+        private static void LegacyRespec(Pawn p)
+        {
+            PawnSkillsReimaginedGameComponent comp = PawnSkillsReimaginedGameComponent.Instance;
+            if (comp == null || p == null)
+            {
+                return;
+            }
+            string result = comp.LegacyRespec(p);
+            if (p.Spawned && p.Map != null)
+            {
+                MoteMaker.ThrowText(p.DrawPos, p.Map, "Refunded " + result);
+            }
+        }
+
         // Runs the change, then floats the resulting level/point totals over the
         // pawn so the effect is visible immediately.
         private static void Apply(Pawn pawn, System.Action<PawnSkillsReimaginedGameComponent> change)
@@ -64,6 +87,22 @@ namespace PawnSkillsReimagined
                 PawnProgress p = comp.For(pawn);
                 MoteMaker.ThrowText(pawn.DrawPos, pawn.Map,
                     "Lv " + p.level + "  |  " + comp.AvailableFor(pawn) + " pts");
+            }
+        }
+
+        // As Apply, but floats the banked-respec count instead.
+        private static void ApplyRespec(Pawn pawn, System.Action<PawnSkillsReimaginedGameComponent> change)
+        {
+            PawnSkillsReimaginedGameComponent comp = PawnSkillsReimaginedGameComponent.Instance;
+            if (comp == null || pawn == null)
+            {
+                return;
+            }
+            change(comp);
+            if (pawn.Spawned && pawn.Map != null)
+            {
+                MoteMaker.ThrowText(pawn.DrawPos, pawn.Map,
+                    comp.RespecPointsFor(pawn) + " respecs");
             }
         }
 

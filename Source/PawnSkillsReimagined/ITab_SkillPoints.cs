@@ -213,6 +213,40 @@ namespace PawnSkillsReimagined
                 }
             }
 
+            // Respec: refunds every point-bought rank / expertise level using one
+            // banked respec. Confirmation-gated since it rewrites the pawn's build.
+            if (canSpend)
+            {
+                int respecs = comp.RespecPointsFor(pawn);
+                Rect respecRect = new Rect(rect.xMax - 130f, btnY, 130f, 32f);
+                if (Mouse.IsOver(respecRect))
+                {
+                    TooltipHandler.TipRegion(respecRect,
+                        "Refund all point-bought skill ranks and expertise levels so the points can be re-spent. " +
+                        "Uses 1 banked respec. New colonists start with 1; +1 every " +
+                        PawnSkillsReimaginedMod.Settings.respecLevelInterval + " levels earned in play.");
+                }
+                if (style.Button(respecRect, RespecLabel(respecs), respecs > 0, null) && respecs > 0)
+                {
+                    Pawn target = pawn;
+                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+                        "Respec " + target.LabelShortCap +
+                        "? All point-bought skill ranks and expertise levels are refunded for re-spending. " +
+                        "This uses 1 banked respec.",
+                        () =>
+                        {
+                            if (comp.TryRespec(target))
+                            {
+                                pendingSkills.Clear();
+                                pendingExpertise.Clear();
+                                acquireFor = null;
+                                SoundDefOf.ExecuteTrade.PlayOneShotOnCamera();
+                            }
+                        },
+                        destructive: true));
+                }
+            }
+
             Text.Font = GameFont.Tiny;
             GUI.color = Color.gray;
             Widgets.Label(new Rect(rect.x, rect.yMax - 20f, rect.width, 20f),
@@ -463,6 +497,18 @@ namespace PawnSkillsReimagined
             {
                 label = "+ (" + cost + ")";
                 PlusLabels[cost] = label;
+            }
+            return label;
+        }
+
+        private static readonly Dictionary<int, string> RespecLabels = new Dictionary<int, string>();
+
+        private static string RespecLabel(int count)
+        {
+            if (!RespecLabels.TryGetValue(count, out string label))
+            {
+                label = "Respec (" + count + ")";
+                RespecLabels[count] = label;
             }
             return label;
         }

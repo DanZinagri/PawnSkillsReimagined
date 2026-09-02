@@ -36,6 +36,12 @@
     <PSR_SkillsLevelNormally_Desc>Off (default): earned skill XP is funnelled entirely into character levels and the skill itself does not rise on its own. On: the XP still funnels to the character level, but also levels the skill the vanilla way on top of it - so skills climb both from use and from spent points.</PSR_SkillsLevelNormally_Desc>
     <PSR_RadiusStyle>Match Radius UI button style</PSR_RadiusStyle>
     <PSR_RadiusStyle_Desc>When Radius UI - Inspector is installed, draw this mod's buttons using its framework styling so they blend in with its inspector layout. Turn off to keep vanilla-styled buttons.</PSR_RadiusStyle_Desc>
+    <PSR_RespecInterval>Levels per respec point</PSR_RespecInterval>
+    <PSR_RespecInterval_Desc>Character levels earned in play per +1 banked respec. A respec refunds every point-bought skill rank and expertise level so the points can be re-spent. Newly created colonists start with 1 banked respec; NPCs never spawn with any, and starting XP does not count toward the next one.</PSR_RespecInterval_Desc>
+    <PSR_XpSplitEnable>Enable XP split</PSR_XpSplitEnable>
+    <PSR_XpSplitEnable_Desc>Split earned skill XP between the pawn's character level and the skill itself using the ratio below. Off: both receive the full amount (fastest progression).</PSR_XpSplitEnable_Desc>
+    <PSR_XpSplit>XP split: {0}% pawn / {1}% skill</PSR_XpSplit>
+    <PSR_XpSplit_Desc>Share of earned XP that feeds the pawn's character level; the rest goes to the skill being used. Whole percentages, 1-99.</PSR_XpSplit_Desc>
     <PSR_SkillDecay>Enable skill XP decay</PSR_SkillDecay>
     <PSR_SkillDecay_Desc>Off (default): skills never rust. On: skills lose XP over time the vanilla way, but never below their committed floor - the ranks a pawn had at spawn plus any bought with points. Only ranks gained purely from use can decay. (A skill's floor is captured the first time it matters, so on existing saves a pawn's current ranks are protected and only future gains can erode.)</PSR_SkillDecay_Desc>
     <PSR_TabGeneral>General</PSR_TabGeneral>

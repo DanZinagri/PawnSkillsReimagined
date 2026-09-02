@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -23,6 +23,16 @@ namespace PawnSkillsReimagined
         // dual-level + skill decay are on. Null until first touched; entries are
         // created lazily so this stays sparse and empty otherwise.
         public Dictionary<SkillDef, int> skillFloor;
+        // Banked respecs: 1 granted to newly generated player pawns, then +1 per
+        // respecLevelInterval character levels EARNED IN PLAY (GainXP only - never
+        // starting XP or dev level tools, so spawns/recruits can't arrive stocked).
+        public int respecPoints;
+        // What a respec refunds, tracked at purchase time. Ranks so use-leveled
+        // ranks survive a respec in dual mode; points paid so the refund is exact
+        // under cost scaling (and untracked pre-existing spends refund nothing).
+        public Dictionary<SkillDef, int> boughtRanks;
+        public Dictionary<SkillDef, int> boughtPoints;
+        public Dictionary<VSE.Expertise.ExpertiseDef, int> boughtExpertise;
 
         public void ExposeData()
         {
@@ -30,10 +40,17 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref xp, "xp", 0f);
             Scribe_Values.Look(ref spentPoints, "spentPoints", 0);
             Scribe_Values.Look(ref expertisePoints, "expertisePoints", 0);
+            Scribe_Values.Look(ref respecPoints, "respecPoints", 0);
             Scribe_Collections.Look(ref skillFloor, "skillFloor", LookMode.Def, LookMode.Value);
-            if (Scribe.mode == LoadSaveMode.PostLoadInit && skillFloor != null)
+            Scribe_Collections.Look(ref boughtRanks, "boughtRanks", LookMode.Def, LookMode.Value);
+            Scribe_Collections.Look(ref boughtPoints, "boughtPoints", LookMode.Def, LookMode.Value);
+            Scribe_Collections.Look(ref boughtExpertise, "boughtExpertise", LookMode.Def, LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
-                skillFloor.RemoveAll(kvp => kvp.Key == null);
+                skillFloor?.RemoveAll(kvp => kvp.Key == null);
+                boughtRanks?.RemoveAll(kvp => kvp.Key == null);
+                boughtPoints?.RemoveAll(kvp => kvp.Key == null);
+                boughtExpertise?.RemoveAll(kvp => kvp.Key == null);
             }
         }
     }
@@ -143,6 +160,7 @@ namespace PawnSkillsReimagined
                 }
             }
             GrantExpertisePoints(p, before);
+            GrantRespecPoints(p, before);
             if (p.level >= maxLevel)
             {
                 p.xp = 0f;
@@ -289,6 +307,7 @@ namespace PawnSkillsReimagined
             PawnProgress p = For(pawn);
             record.levelInt++;
             p.spentPoints += cost;
+            TrackPurchase(p, record.def, cost);
             // A bought rank is committed, so it raises the skill's decay floor (only
             // relevant while decay is on; otherwise no floor is tracked).
             var settings = PawnSkillsReimaginedMod.Settings;
@@ -352,6 +371,12 @@ namespace PawnSkillsReimagined
             }
             record.Level++;
             p.expertisePoints -= 1;
+            if (p.boughtExpertise == null)
+            {
+                p.boughtExpertise = new Dictionary<VSE.Expertise.ExpertiseDef, int>();
+            }
+            p.boughtExpertise.TryGetValue(record.def, out int bought);
+            p.boughtExpertise[record.def] = bought + 1;
             return true;
         }
 
@@ -365,6 +390,193 @@ namespace PawnSkillsReimagined
             }
             int interval = Mathf.Max(1, PawnSkillsReimaginedMod.Settings.expertisePointInterval);
             p.expertisePoints += p.level / interval - oldLevel / interval;
+        }
+
+        // Record a skill-rank purchase for later refunding by a respec.
+        private static void TrackPurchase(PawnProgress p, SkillDef skill, int cost)
+        {
+            if (p.boughtRanks == null)
+            {
+                p.boughtRanks = new Dictionary<SkillDef, int>();
+                p.boughtPoints = new Dictionary<SkillDef, int>();
+            }
+            p.boughtRanks.TryGetValue(skill, out int ranks);
+            p.boughtRanks[skill] = ranks + 1;
+            p.boughtPoints.TryGetValue(skill, out int paid);
+            p.boughtPoints[skill] = paid + cost;
+        }
+
+        // +1 banked respec each time a level-up crosses a respecLevelInterval
+        // breakpoint. Called only from GainXP (earned play), so starting XP and
+        // dev tools never mint respecs.
+        private static void GrantRespecPoints(PawnProgress p, int oldLevel)
+        {
+            if (p.level <= oldLevel)
+            {
+                return;
+            }
+            int interval = Mathf.Max(1, PawnSkillsReimaginedMod.Settings.respecLevelInterval);
+            p.respecPoints += p.level / interval - oldLevel / interval;
+        }
+
+        public int RespecPointsFor(Pawn pawn)
+        {
+            return GetProgressOrNull(pawn)?.respecPoints ?? 0;
+        }
+
+        // Grant (delta > 0) or revoke (delta < 0) banked respecs, floored at zero.
+        // Dev-tool entry point.
+        public void AddRespecPoints(Pawn pawn, int delta)
+        {
+            if (pawn == null || delta == 0)
+            {
+                return;
+            }
+            PawnProgress p = For(pawn);
+            p.respecPoints = Mathf.Max(0, p.respecPoints + delta);
+        }
+
+        // Spend one banked respec: remove every tracked point-bought skill rank and
+        // expertise level and refund exactly the points paid. Untracked ranks
+        // (pre-tracking spends, use-leveled ranks, aptitudes) are untouched, so a
+        // respec can never mint points it didn't collect.
+        public bool TryRespec(Pawn pawn)
+        {
+            PawnProgress p = GetProgressOrNull(pawn);
+            if (p == null || p.respecPoints < 1 || pawn?.skills == null)
+            {
+                return false;
+            }
+            if (p.boughtRanks != null)
+            {
+                foreach (KeyValuePair<SkillDef, int> kvp in p.boughtRanks)
+                {
+                    SkillRecord record = pawn.skills.GetSkill(kvp.Key);
+                    if (record != null)
+                    {
+                        record.levelInt = Mathf.Max(0, record.levelInt - kvp.Value);
+                    }
+                    // Bought ranks no longer exist, so their decay protection goes
+                    // too; the floor re-inits from current level on next touch.
+                    p.skillFloor?.Remove(kvp.Key);
+                }
+                p.boughtRanks.Clear();
+            }
+            if (p.boughtPoints != null)
+            {
+                int paid = 0;
+                foreach (KeyValuePair<SkillDef, int> kvp in p.boughtPoints)
+                {
+                    paid += kvp.Value;
+                }
+                p.spentPoints = Mathf.Max(0, p.spentPoints - paid);
+                p.boughtPoints.Clear();
+            }
+            if (p.boughtExpertise != null)
+            {
+                VSE.ExpertiseTracker tracker = VSE.ExpertiseTrackers.Expertise(pawn);
+                if (tracker != null)
+                {
+                    foreach (KeyValuePair<VSE.Expertise.ExpertiseDef, int> kvp in p.boughtExpertise)
+                    {
+                        foreach (VSE.ExpertiseRecord er in tracker.AllExpertise)
+                        {
+                            if (er.def == kvp.Key)
+                            {
+                                int refund = Mathf.Min(kvp.Value, er.Level);
+                                er.Level -= refund;
+                                p.expertisePoints += refund;
+                                break;
+                            }
+                        }
+                    }
+                }
+                p.boughtExpertise.Clear();
+            }
+            p.respecPoints -= 1;
+            return true;
+        }
+
+        // Dev-tool reconstruction of purchases made before purchase tracking
+        // existed (mod updated mid-save). Built on what is still knowable: the
+        // backstory base is recomputed from the pawn's story, everything above
+        // base + tracked purchases counts as legacy-bought, and each stripped rank
+        // is paid for out of the pawn's untracked spent points - so it can never
+        // refund more than was truly spent, and stops when the pool runs out
+        // (which bounds pre-mod vanilla rolls and dual-mode use-leveled ranks).
+        // Tracked purchases are untouched and stay refundable by the normal
+        // respec. Expertise has no spend pool to cap against, so on saves that ran
+        // dual-level mode its XP-gained levels refund too. Free: does not consume
+        // a banked respec.
+        public string LegacyRespec(Pawn pawn)
+        {
+            PawnProgress p = GetProgressOrNull(pawn);
+            if (p == null || pawn?.skills == null)
+            {
+                return "no progress data";
+            }
+            int tracked = 0;
+            if (p.boughtPoints != null)
+            {
+                foreach (KeyValuePair<SkillDef, int> kvp in p.boughtPoints)
+                {
+                    tracked += kvp.Value;
+                }
+            }
+            int pool = p.spentPoints - tracked;
+            int refunded = 0;
+            int ranks = 0;
+            if (pool > 0)
+            {
+                List<BackstoryDef> backstories = pawn.story?.AllBackstories;
+                foreach (SkillRecord record in pawn.skills.skills)
+                {
+                    int floor = HarmonyPatches.BackstorySkillBase(backstories, record.def);
+                    if (p.boughtRanks != null && p.boughtRanks.TryGetValue(record.def, out int trackedRanks))
+                    {
+                        floor += trackedRanks;
+                    }
+                    int strippedBefore = ranks;
+                    while (record.levelInt > floor)
+                    {
+                        int cost = PointCosts.CostAtLevel(record, record.levelInt - 1);
+                        if (cost > pool)
+                        {
+                            break;
+                        }
+                        record.levelInt--;
+                        pool -= cost;
+                        refunded += cost;
+                        ranks++;
+                    }
+                    if (ranks > strippedBefore)
+                    {
+                        p.skillFloor?.Remove(record.def);
+                    }
+                }
+                p.spentPoints = Mathf.Max(0, p.spentPoints - refunded);
+            }
+
+            // Expertise: levels cost 1 point each, and outside dual mode they can
+            // only come from purchases - anything above the tracked count is legacy.
+            int expRefunded = 0;
+            VSE.ExpertiseTracker tracker = VSE.ExpertiseTrackers.Expertise(pawn);
+            if (tracker != null)
+            {
+                foreach (VSE.ExpertiseRecord er in tracker.AllExpertise)
+                {
+                    int trackedLevels = 0;
+                    p.boughtExpertise?.TryGetValue(er.def, out trackedLevels);
+                    int strip = er.Level - trackedLevels;
+                    if (strip > 0)
+                    {
+                        er.Level -= strip;
+                        expRefunded += strip;
+                    }
+                }
+                p.expertisePoints += expRefunded;
+            }
+            return refunded + " pts / " + ranks + " ranks, " + expRefunded + " expertise pts";
         }
 
         // Unspent expertise points available to raise expertise levels.

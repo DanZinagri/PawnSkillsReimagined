@@ -111,6 +111,12 @@ namespace PawnSkillsReimagined
         {
             var settings = PawnSkillsReimaginedMod.Settings;
             bool dualLevel = settings.skillsLevelNormally;
+            // With the XP split on (dual-level only), the pawn level takes its share
+            // and the skill keeps the remainder; otherwise both get the full amount
+            // (the pre-split dual behaviour).
+            float pawnShare = dualLevel && settings.xpSplitEnabled
+                ? Mathf.Clamp(settings.xpSplitPct, 1, 99) / 100f
+                : 1f;
             if (xp > 0f && !__instance.TotallyDisabled)
             {
                 float funneled = ignoreLearnRate ? xp : xp * __instance.LearnRateFactor(direct);
@@ -124,7 +130,7 @@ namespace PawnSkillsReimagined
                     {
                         __instance.xpSinceMidnight += funneled;
                     }
-                    PawnSkillsReimaginedGameComponent.Instance?.GainXP(__instance.Pawn, funneled);
+                    PawnSkillsReimaginedGameComponent.Instance?.GainXP(__instance.Pawn, funneled * pawnShare);
                 }
             }
 
@@ -150,6 +156,12 @@ namespace PawnSkillsReimagined
             if (!keep)
             {
                 xp = 0f;
+            }
+            else if (xp > 0f && pawnShare < 1f)
+            {
+                // Skill keeps its share of the split (scaled before the original
+                // runs, so vanilla's learn-rate handling applies to it normally).
+                xp *= 1f - pawnShare;
             }
             return true;
         }
@@ -227,6 +239,33 @@ namespace PawnSkillsReimagined
         // on top of backstories; instead of discarding that roll, its value is priced with vanilla's own skill XP curve and granted as starting
         // character XP - so pawns "keep" the life experience vanilla intended, expressed as levels and points. World pawns auto-spend the points
         // randomly (weighted toward their backstory skills); player starting pawns bank them for the player to spend.
+        // Sum of backstory skill gains for one skill - the deterministic base this
+        // mod assigns at generation, recomputable at any time from the pawn's story
+        // (also used by the legacy-respec reconstruction).
+        public static int BackstorySkillBase(List<BackstoryDef> backstories, SkillDef skill)
+        {
+            int total = 0;
+            if (backstories != null)
+            {
+                for (int i = 0; i < backstories.Count; i++)
+                {
+                    List<SkillGain> gains = backstories[i].skillGains;
+                    if (gains == null)
+                    {
+                        continue;
+                    }
+                    for (int j = 0; j < gains.Count; j++)
+                    {
+                        if (gains[j].skill == skill)
+                        {
+                            total += gains[j].amount;
+                        }
+                    }
+                }
+            }
+            return Mathf.Max(0, total);
+        }
+
         public static void GenerateSkills_Postfix(Pawn pawn)
         {
             if (pawn?.skills?.skills == null)
@@ -243,26 +282,7 @@ namespace PawnSkillsReimagined
             float rolledXp = 0f;
             foreach (SkillRecord record in pawn.skills.skills)
             {
-                int total = 0;
-                if (backstories != null)
-                {
-                    for (int i = 0; i < backstories.Count; i++)
-                    {
-                        List<SkillGain> gains = backstories[i].skillGains;
-                        if (gains == null)
-                        {
-                            continue;
-                        }
-                        for (int j = 0; j < gains.Count; j++)
-                        {
-                            if (gains[j].skill == record.def)
-                            {
-                                total += gains[j].amount;
-                            }
-                        }
-                    }
-                }
-                total = Mathf.Max(0, total);
+                int total = BackstorySkillBase(backstories, record.def);
 
                 // Price the roll in vanilla skill XP, stretched past 20 for NPCs.
                 // record.levelInt is vanilla's rolled level (0-20); each level past
@@ -279,6 +299,12 @@ namespace PawnSkillsReimagined
             }
 
             var comp = PawnSkillsReimaginedGameComponent.Instance;
+            // Newly generated player-faction pawns start with one banked respec;
+            // NPCs never spawn with any (level-based respecs only accrue in play).
+            if (comp != null && !npc)
+            {
+                comp.For(pawn).respecPoints = 1;
+            }
             float multiplier = PawnSkillsReimaginedMod.Settings.startingXpMultiplier;
             if (comp == null || rolledXp <= 0f || multiplier <= 0f)
             {

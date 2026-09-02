@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using VSE.Passions;
@@ -23,6 +23,8 @@ namespace PawnSkillsReimagined
         private string bufStartingXp;
         private string bufScaleInterval;
         private string bufNpcStretch;
+        private string bufXpSplit;
+        private string bufRespecInterval;
         private string bufTechNeo, bufTechMed, bufTechInd, bufTechSpacer, bufTechUltra, bufTechArch;
         private readonly Dictionary<string, string> bufPassionCosts = new Dictionary<string, string>();
 
@@ -65,7 +67,7 @@ namespace PawnSkillsReimagined
 
         private void DoGeneralTab(Rect inRect)
         {
-            float viewHeight = 15 * 32f + 40f;
+            float viewHeight = 18 * 32f + 40f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -78,6 +80,8 @@ namespace PawnSkillsReimagined
                 "PSR_MaxCharacterLevel_Desc".Translate());
             IntRow(listing, "PSR_PointsPerLevel".Translate(), ref Settings.pointsPerLevel, ref bufPointsPerLevel, 1, 20,
                 "PSR_PointsPerLevel_Desc".Translate());
+            IntRow(listing, "PSR_RespecInterval".Translate(), ref Settings.respecLevelInterval, ref bufRespecInterval, 10, 1000,
+                "PSR_RespecInterval_Desc".Translate());
             Rect maxExpRow = listing.GetRect(28f);
             TooltipHandler.TipRegion(maxExpRow, "PSR_ScaleMaxExpertise_Desc".Translate());
             Widgets.CheckboxLabeled(maxExpRow, "PSR_ScaleMaxExpertise".Translate(), ref Settings.overrideMaxExpertise);
@@ -107,6 +111,16 @@ namespace PawnSkillsReimagined
                 Rect decayRow = listing.GetRect(28f);
                 TooltipHandler.TipRegion(decayRow, "PSR_SkillDecay_Desc".Translate());
                 Widgets.CheckboxLabeled(decayRow, "PSR_SkillDecay".Translate(), ref Settings.enableSkillDecay);
+
+                Rect splitRow = listing.GetRect(28f);
+                TooltipHandler.TipRegion(splitRow, "PSR_XpSplitEnable_Desc".Translate());
+                Widgets.CheckboxLabeled(splitRow, "PSR_XpSplitEnable".Translate(), ref Settings.xpSplitEnabled);
+                if (Settings.xpSplitEnabled)
+                {
+                    // Label shows the live ratio for the current slider position.
+                    IntRow(listing, "PSR_XpSplit".Translate(Settings.xpSplitPct, 100 - Settings.xpSplitPct),
+                        ref Settings.xpSplitPct, ref bufXpSplit, 1, 99, "PSR_XpSplit_Desc".Translate());
+                }
             }
             if (RadiusUIStyle.Available)
             {
@@ -401,6 +415,9 @@ namespace PawnSkillsReimagined
         public float xpRequirementMultiplier = 1f;            // scales XP needed per level
         public bool skillsLevelNormally = true;              // on = funneled XP also levels the skill itself (vanilla-style)
         public bool enableSkillDecay = false;                 // (dual-level only) allow skill decay down to each skill's committed floor
+        public bool xpSplitEnabled = true;                    // (dual-level only) split earned XP between pawn level and the skill
+        public int xpSplitPct = 40;                           // % of earned XP going to the pawn level (rest goes to the skill)
+        public int respecLevelInterval = 100;                 // character levels per +1 banked respec (earned in play)
         public bool radiusUIStyle = true;                     // when Radius UI is installed, draw our buttons in its style
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
         public float npcSkillRollStretch = 1.5f;              // NPC skill roll extends past vanilla's 20 cap by this factor
@@ -432,6 +449,9 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref xpRequirementMultiplier, "xpRequirementMultiplier", 1f);
             Scribe_Values.Look(ref skillsLevelNormally, "skillsLevelNormally", false);
             Scribe_Values.Look(ref enableSkillDecay, "enableSkillDecay", false);
+            Scribe_Values.Look(ref xpSplitEnabled, "xpSplitEnabled", true);
+            Scribe_Values.Look(ref xpSplitPct, "xpSplitPct", 40);
+            Scribe_Values.Look(ref respecLevelInterval, "respecLevelInterval", 100);
             Scribe_Values.Look(ref radiusUIStyle, "radiusUIStyle", true);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);
             Scribe_Values.Look(ref npcSkillRollStretch, "npcSkillRollStretch", 1.5f);
