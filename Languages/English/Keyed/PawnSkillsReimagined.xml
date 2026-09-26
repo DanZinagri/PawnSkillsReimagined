@@ -38,6 +38,8 @@
     <PSR_RadiusStyle_Desc>When Radius UI - Inspector is installed, draw this mod's buttons using its framework styling so they blend in with its inspector layout. Turn off to keep vanilla-styled buttons.</PSR_RadiusStyle_Desc>
     <PSR_RespecInterval>Levels per respec point</PSR_RespecInterval>
     <PSR_RespecInterval_Desc>Character levels earned in play per +1 banked respec. A respec refunds every point-bought skill rank and expertise level so the points can be re-spent. Newly created colonists start with 1 banked respec; NPCs never spawn with any, and starting XP does not count toward the next one.</PSR_RespecInterval_Desc>
+    <PSR_ExpertiseGainsXp>Expertise gains XP from skill use</PSR_ExpertiseGainsXp>
+    <PSR_ExpertiseGainsXp_Desc>Off (default): expertise only levels with expertise points. On: skill XP earned while working also levels matching expertise, as in Vanilla Skills Expanded. Expertise never decays, so XP it gains this way is permanent.</PSR_ExpertiseGainsXp_Desc>
     <PSR_XpSplitEnable>Enable XP split</PSR_XpSplitEnable>
     <PSR_XpSplitEnable_Desc>Split earned skill XP between the pawn's character level and the skill itself using the ratio below. Off: both receive the full amount (fastest progression).</PSR_XpSplitEnable_Desc>
     <PSR_XpSplit>XP split: {0}% pawn / {1}% skill</PSR_XpSplit>

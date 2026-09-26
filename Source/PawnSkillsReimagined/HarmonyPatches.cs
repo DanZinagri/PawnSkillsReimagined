@@ -29,6 +29,13 @@ namespace PawnSkillsReimagined
                 AccessTools.Method(typeof(PawnGenerator), "GenerateSkills"),
                 postfix: new HarmonyMethod(self, nameof(GenerateSkills_Postfix)));
 
+            // -- Gate VSE's skill->expertise XP feed (a postfix on Learn). Expertise
+            // never decays, so in dual-level mode letting it gain XP from use would
+            // bypass the expertise-point economy permanently.
+            harmony.Patch(
+                AccessTools.Method("VSE.Expertise.ExpertisePatches:PostLearn"),
+                prefix: new HarmonyMethod(self, nameof(ExpertisePostLearn_Prefix)));
+
             // -- Extend skill decay above 20 (vanilla's decay switch stops at 20)
             harmony.Patch(
                 AccessTools.Method(typeof(SkillRecord), nameof(SkillRecord.Interval)),
@@ -93,6 +100,16 @@ namespace PawnSkillsReimagined
             ExpertiseUnlockCompat.Patch(harmony);
 
             InjectSkillPointsTab();
+        }
+
+        // Runs VSE's expertise XP feed only in dual-level mode with the option on.
+        // Outside dual mode our Learn prefix has already zeroed the XP, so the feed
+        // would no-op anyway - skipping it there is identical and saves its
+        // per-Learn expertise lookup and loop.
+        public static bool ExpertisePostLearn_Prefix()
+        {
+            var settings = PawnSkillsReimaginedMod.Settings;
+            return settings.skillsLevelNormally && settings.expertiseGainsXp;
         }
 
         public static void ModSettingsClosed_Postfix()

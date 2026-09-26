@@ -67,7 +67,7 @@ namespace PawnSkillsReimagined
 
         private void DoGeneralTab(Rect inRect)
         {
-            float viewHeight = 18 * 32f + 40f;
+            float viewHeight = 19 * 32f + 40f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -111,6 +111,10 @@ namespace PawnSkillsReimagined
                 Rect decayRow = listing.GetRect(28f);
                 TooltipHandler.TipRegion(decayRow, "PSR_SkillDecay_Desc".Translate());
                 Widgets.CheckboxLabeled(decayRow, "PSR_SkillDecay".Translate(), ref Settings.enableSkillDecay);
+
+                Rect expXpRow = listing.GetRect(28f);
+                TooltipHandler.TipRegion(expXpRow, "PSR_ExpertiseGainsXp_Desc".Translate());
+                Widgets.CheckboxLabeled(expXpRow, "PSR_ExpertiseGainsXp".Translate(), ref Settings.expertiseGainsXp);
 
                 Rect splitRow = listing.GetRect(28f);
                 TooltipHandler.TipRegion(splitRow, "PSR_XpSplitEnable_Desc".Translate());
@@ -417,6 +421,7 @@ namespace PawnSkillsReimagined
         public bool enableSkillDecay = false;                 // (dual-level only) allow skill decay down to each skill's committed floor
         public bool xpSplitEnabled = true;                    // (dual-level only) split earned XP between pawn level and the skill
         public int xpSplitPct = 40;                           // % of earned XP going to the pawn level (rest goes to the skill)
+        public bool expertiseGainsXp = false;                 // (dual-level only) let skill-use XP also level expertise (VSE's feed)
         public int respecLevelInterval = 100;                 // character levels per +1 banked respec (earned in play)
         public bool radiusUIStyle = true;                     // when Radius UI is installed, draw our buttons in its style
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
@@ -451,6 +456,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref enableSkillDecay, "enableSkillDecay", false);
             Scribe_Values.Look(ref xpSplitEnabled, "xpSplitEnabled", true);
             Scribe_Values.Look(ref xpSplitPct, "xpSplitPct", 40);
+            Scribe_Values.Look(ref expertiseGainsXp, "expertiseGainsXp", false);
             Scribe_Values.Look(ref respecLevelInterval, "respecLevelInterval", 100);
             Scribe_Values.Look(ref radiusUIStyle, "radiusUIStyle", true);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);
