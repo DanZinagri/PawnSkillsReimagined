@@ -627,8 +627,13 @@ namespace PawnSkillsReimagined
             // find nothing, wiping every pawn's level.
             if (Scribe.mode == LoadSaveMode.Saving)
             {
-                progress.RemoveAll(kvp => kvp.Key == null || kvp.Key.Destroyed ||
-                                          kvp.Key.Discarded || kvp.Value == null);
+                // Dead pawns read as Destroyed (Thing.Kill destroys the pawn; a
+                // resurrection reverses it), so Destroyed alone would wipe the
+                // progress of anyone saved while dead and later revived. Discarded
+                // is the real "gone for good" signal; a destroyed pawn that isn't
+                // dead (e.g. dev-destroyed) is gone too.
+                progress.RemoveAll(kvp => kvp.Key == null || kvp.Key.Discarded ||
+                                          (kvp.Key.Destroyed && !kvp.Key.Dead) || kvp.Value == null);
                 tmpPawns = progress.Keys.ToList();
                 tmpProgress = progress.Values.ToList();
             }
@@ -656,8 +661,9 @@ namespace PawnSkillsReimagined
                     {
                         Pawn pawn = tmpPawns[i];
                         PawnProgress prog = tmpProgress[i];
-                        // Skip references that failed to resolve (pawn gone).
-                        if (pawn != null && !pawn.Destroyed && prog != null)
+                        // Skip references that failed to resolve (pawn gone). Dead
+                        // pawns are kept - they may still be resurrected.
+                        if (pawn != null && !pawn.Discarded && prog != null)
                         {
                             progress[pawn] = prog;
                         }
