@@ -1,0 +1,6 @@
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\1.6\Mods\CharacterDevelopment\Assemblies\PawnSkillsReimagined.CharacterDevelopment.dll
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined.CharacterDevelopment\obj\Debug\PawnSkillsReimagined.CharacterDevelopment.csproj.AssemblyReference.cache
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined.CharacterDevelopment\obj\Debug\PawnSkillsReimagined.CharacterDevelopment.GeneratedMSBuildEditorConfig.editorconfig
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined.CharacterDevelopment\obj\Debug\PawnSkillsReimagined.CharacterDevelopment.csproj.CoreCompileInputs.cache
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined.CharacterDevelopment\obj\Debug\PawnSkillsReimagined.CharacterDevelopment.sourcelink.json
+E:\SteamLibrary\steamapps\common\RimWorld\Mods\PawnSkillsReimagined\Source\PawnSkillsReimagined.CharacterDevelopment\obj\Debug\PawnSkillsReimagined.CharacterDevelopment.dll

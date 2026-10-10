@@ -96,7 +96,6 @@ namespace PawnSkillsReimagined
                 AccessTools.Method(typeof(Dialog_ModSettings), "PreClose"),
                 postfix: new HarmonyMethod(self, nameof(ModSettingsClosed_Postfix)));
 
-            CharacterDevelopmentCompat.PatchRewardCap(harmony);
             ExpertiseUnlockCompat.Patch(harmony);
 
             InjectSkillPointsTab();
@@ -115,6 +114,7 @@ namespace PawnSkillsReimagined
         public static void ModSettingsClosed_Postfix()
         {
             ITab_SkillPoints.InvalidateCaches();
+            PawnSkillsReimaginedEvents.RaiseSettingsClosed();
         }
 
         // --------------------------------------------------------------------

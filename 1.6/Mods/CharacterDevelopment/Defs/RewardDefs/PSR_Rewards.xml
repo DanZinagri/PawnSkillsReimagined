@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+    <WantsAndQuirks.RewardDef>
+        <defName>PSR_RewardUpgradePassion</defName>
+        <label>passion surge</label>
+        <description>Raises the passion of a random skill by one step: frozen or apathetic becomes no passion, no passion becomes interested, interested becomes burning, and burning becomes critical. Other situational passions become burning.</description>
+        <iconPath>UI/Icons/PassionMajor</iconPath>
+        <rarity>Legendary</rarity>
+        <workerClass>PawnSkillsReimagined.CharacterDevelopment.RewardWorker_UpgradePassion</workerClass>
+    </WantsAndQuirks.RewardDef>
+
+</Defs>

@@ -67,7 +67,7 @@ namespace PawnSkillsReimagined
 
         private void DoGeneralTab(Rect inRect)
         {
-            float viewHeight = 19 * 32f + 40f;
+            float viewHeight = 20 * 32f + 40f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -125,6 +125,12 @@ namespace PawnSkillsReimagined
                     IntRow(listing, "PSR_XpSplit".Translate(Settings.xpSplitPct, 100 - Settings.xpSplitPct),
                         ref Settings.xpSplitPct, ref bufXpSplit, 1, 99, "PSR_XpSplit_Desc".Translate());
                 }
+            }
+            if (ModsConfig.IsActive("ferny.characterdevelopment"))
+            {
+                Rect cdRow = listing.GetRect(28f);
+                TooltipHandler.TipRegion(cdRow, "PSR_CdWantsEvery5_Desc".Translate());
+                Widgets.CheckboxLabeled(cdRow, "PSR_CdWantsEvery5".Translate(), ref Settings.cdSkillWantsEvery5);
             }
             if (RadiusUIStyle.Available)
             {
@@ -415,7 +421,7 @@ namespace PawnSkillsReimagined
         public int expertiseAcquireLevel = 0;                 // override for VSE's skill level to unlock an expertise; 0 = use VSE's own setting
         public float topEndRetention = 0.9f;                 // temper for the beyond-vanilla headroom
         public int qualityVanillaCapLevel = 80;              // skill level where crafting quality reaches vanilla's level-20 ceiling
-        public float xpConversionRate = 1f;                   // skill XP -> pawn level XP multiplier
+        public float xpConversionRate = 1.5f;                 // skill XP -> pawn level XP multiplier
         public float xpRequirementMultiplier = 1f;            // scales XP needed per level
         public bool skillsLevelNormally = true;              // on = funneled XP also levels the skill itself (vanilla-style)
         public bool enableSkillDecay = false;                 // (dual-level only) allow skill decay down to each skill's committed floor
@@ -423,6 +429,7 @@ namespace PawnSkillsReimagined
         public int xpSplitPct = 40;                           // % of earned XP going to the pawn level (rest goes to the skill)
         public bool expertiseGainsXp = false;                 // (dual-level only) let skill-use XP also level expertise (VSE's feed)
         public int respecLevelInterval = 100;                 // character levels per +1 banked respec (earned in play)
+        public bool cdSkillWantsEvery5 = false;              // Character Development: skill-level wants every 5 ranks instead of 10
         public bool radiusUIStyle = true;                     // when Radius UI is installed, draw our buttons in its style
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
         public float npcSkillRollStretch = 1.5f;              // NPC skill roll extends past vanilla's 20 cap by this factor
@@ -450,7 +457,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref expertiseAcquireLevel, "expertiseAcquireLevel", 0);
             Scribe_Values.Look(ref topEndRetention, "topEndRetention", 0.9f);
             Scribe_Values.Look(ref qualityVanillaCapLevel, "qualityVanillaCapLevel", 80);
-            Scribe_Values.Look(ref xpConversionRate, "xpConversionRate", 1f);
+            Scribe_Values.Look(ref xpConversionRate, "xpConversionRate", 1.5f);
             Scribe_Values.Look(ref xpRequirementMultiplier, "xpRequirementMultiplier", 1f);
             Scribe_Values.Look(ref skillsLevelNormally, "skillsLevelNormally", false);
             Scribe_Values.Look(ref enableSkillDecay, "enableSkillDecay", false);
@@ -458,6 +465,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref xpSplitPct, "xpSplitPct", 40);
             Scribe_Values.Look(ref expertiseGainsXp, "expertiseGainsXp", false);
             Scribe_Values.Look(ref respecLevelInterval, "respecLevelInterval", 100);
+            Scribe_Values.Look(ref cdSkillWantsEvery5, "cdSkillWantsEvery5", false);
             Scribe_Values.Look(ref radiusUIStyle, "radiusUIStyle", true);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);
             Scribe_Values.Look(ref npcSkillRollStretch, "npcSkillRollStretch", 1.5f);

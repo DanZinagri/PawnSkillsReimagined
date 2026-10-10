@@ -1,0 +1,81 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.8": {
+      "PawnSkillsReimagined/1.0.0": {
+        "type": "project",
+        "framework": ".NETFramework,Version=v4.8",
+        "compile": {
+          "bin/placeholder/PawnSkillsReimagined.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/PawnSkillsReimagined.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "PawnSkillsReimagined/1.0.0": {
+      "type": "project",
+      "path": "../PawnSkillsReimagined/PawnSkillsReimagined.csproj",
+      "msbuildProject": "../PawnSkillsReimagined/PawnSkillsReimagined.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.8": [
+      "PawnSkillsReimagined >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\DanZinagri\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined.CharacterDevelopment\\PawnSkillsReimagined.CharacterDevelopment.csproj",
+      "projectName": "PawnSkillsReimagined.CharacterDevelopment",
+      "projectPath": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined.CharacterDevelopment\\PawnSkillsReimagined.CharacterDevelopment.csproj",
+      "packagesPath": "C:\\Users\\DanZinagri\\.nuget\\packages\\",
+      "outputPath": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined.CharacterDevelopment\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\DanZinagri\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net48"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net48": {
+          "targetAlias": "net48",
+          "projectReferences": {
+            "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimagined.csproj": {
+              "projectPath": "E:\\SteamLibrary\\steamapps\\common\\RimWorld\\Mods\\PawnSkillsReimagined\\Source\\PawnSkillsReimagined\\PawnSkillsReimagined.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net48": {
+        "targetAlias": "net48",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.318\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

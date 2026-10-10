@@ -25,7 +25,7 @@
     <PSR_QualityCapLevel>Vanilla quality at level</PSR_QualityCapLevel>
     <PSR_QualityCapLevel_Desc>Skill level at which crafting, construction and art quality reaches vanilla's level-20 ceiling (consistent Excellent/Masterwork). Below this the quality curve ramps up to it; above it, quality keeps climbing past vanilla into more frequent Masterwork and, near the cap, Legendary. Set to 20 for vanilla timing. Inspired Creativity's +2 still applies on top, as in vanilla.</PSR_QualityCapLevel_Desc>
     <PSR_XpConversion>XP conversion rate</PSR_XpConversion>
-    <PSR_XpConversion_Desc>Skill XP earned from work and combat is multiplied by this before feeding the pawn's level. 1 = every point of skill XP counts.</PSR_XpConversion_Desc>
+    <PSR_XpConversion_Desc>Skill XP earned from work and combat is multiplied by this before feeding the pawn's level. 1 = every point of skill XP counts once; the default 1.5 counts each point 1.5 times.</PSR_XpConversion_Desc>
     <PSR_XpRequirement>XP required per level</PSR_XpRequirement>
     <PSR_XpRequirement_Desc>Multiplies the XP needed for each level-up. 1 = the standard curve (100 x level^1.5).</PSR_XpRequirement_Desc>
     <PSR_StartingXp>Starting XP multiplier</PSR_StartingXp>
@@ -34,6 +34,9 @@
     <PSR_NpcRollStretch_Desc>Vanilla caps a pawn's rolled skills at 20. For generated NPCs this stretches that roll past the cap by this factor (e.g. 1.5 lets a skill vanilla rolled to 20 count as 30), so skilled factions produce meaningfully stronger pawns. The extra is granted as starting XP and spent at normal cost, so a recruited pawn's numbers stay consistent. 1.0 = vanilla cap. Does not affect your starting colonists.</PSR_NpcRollStretch_Desc>
     <PSR_SkillsLevelNormally>Skills can level normally</PSR_SkillsLevelNormally>
     <PSR_SkillsLevelNormally_Desc>Off (default): earned skill XP is funnelled entirely into character levels and the skill itself does not rise on its own. On: the XP still funnels to the character level, but also levels the skill the vanilla way on top of it - so skills climb both from use and from spent points.</PSR_SkillsLevelNormally_Desc>
+    <PSR_PassionUpgraded>{0}'s passion for {1} grew from {2} to {3}.</PSR_PassionUpgraded>
+    <PSR_CdWantsEvery5>Character Development: skill wants every 5 ranks</PSR_CdWantsEvery5>
+    <PSR_CdWantsEvery5_Desc>Character Development's "reach skill level" wants are rescaled to this mod's skill cap: its four originals become levels 10, 20, 30 and 40, and further wants are added every 10 ranks up to the cap. On: add a want every 5 ranks instead. The ladder as a whole keeps Character Development's original frequency, spread across all its tiers, and rewards grow toward the cap.</PSR_CdWantsEvery5_Desc>
     <PSR_RadiusStyle>Match Radius UI button style</PSR_RadiusStyle>
     <PSR_RadiusStyle_Desc>When Radius UI - Inspector is installed, draw this mod's buttons using its framework styling so they blend in with its inspector layout. Turn off to keep vanilla-styled buttons.</PSR_RadiusStyle_Desc>
     <PSR_RespecInterval>Levels per respec point</PSR_RespecInterval>

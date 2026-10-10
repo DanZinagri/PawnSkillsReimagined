@@ -316,9 +316,8 @@ namespace PawnSkillsReimagined
                 RaiseDecayFloor(p, record);
             }
             // Skills raised via points bypass SkillRecord.Learn, so mods watching
-            // it for skill-increase rewards (Character Development) miss the event
-            // - re-emit it. No-ops when that mod isn't loaded.
-            CharacterDevelopmentCompat.NotifySkillIncreased(pawn, record.def, record.levelInt);
+            // it for skill increases (Character Development) miss the event.
+            PawnSkillsReimaginedEvents.RaiseSkillRankBought(pawn, record.def, record.levelInt);
             return true;
         }
 
