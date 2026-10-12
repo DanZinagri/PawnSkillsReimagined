@@ -1,19 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net48</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<RootNamespace>PawnSkillsReimagined</RootNamespace>
 		<AssemblyName>PawnSkillsReimagined</AssemblyName>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDependencyFile>false</GenerateDependencyFile>
 		<Nullable>disable</Nullable>
 		<DebugType>embedded</DebugType>
 		<!-- Point these at your own installs if they live somewhere else. -->
-		<RimWorldManagedDir>E:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed</RimWorldManagedDir>
-		<HarmonyDir>E:\SteamLibrary\steamapps\workshop\content\294100\2009463077\Current\Assemblies</HarmonyDir>
+		<RimWorldManagedDir>E:\SteamLibrary\steamapps\common\RimWorld</RimWorldManagedDir>
+		<HarmonyDir>E:\SteamLibrary\steamapps\workshop\content\294100\2009463077\1.7\Assemblies</HarmonyDir>
 		<VSEDir>E:\SteamLibrary\steamapps\workshop\content\294100\3400246558\1.6\Assemblies</VSEDir>
-		<OutputPath>..\..\1.6\Assemblies\</OutputPath>
+		<OutputPath>..\..\1.7\Assemblies\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -21,16 +22,13 @@
 			<HintPath>$(RimWorldManagedDir)\Assembly-CSharp.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
-		<Reference Include="UnityEngine.CoreModule">
-			<HintPath>$(RimWorldManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+		<Reference Include="UnityStubs">
+			<HintPath>$(RimWorldManagedDir)\UnityStubs.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
-		<Reference Include="UnityEngine.IMGUIModule">
-			<HintPath>$(RimWorldManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.TextRenderingModule">
-			<HintPath>$(RimWorldManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath>
+		<!-- Compile-time only. Dependencies built for 1.6 name Unity types by their old module assemblies;
+		     these forward those names to UnityStubs, as the game's runtime does. See mkfacade.cs.txt in that folder. -->
+		<Reference Include="C:\Users\DanZinagri\Documents\RimWorldModding\RimWorld-1.7-UnityFacades\UnityEngine*.dll">
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="0Harmony">
