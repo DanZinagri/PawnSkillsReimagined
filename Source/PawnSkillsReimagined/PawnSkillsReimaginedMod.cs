@@ -25,6 +25,7 @@ namespace PawnSkillsReimagined
         private string bufNpcStretch;
         private string bufXpSplit;
         private string bufRespecInterval;
+        private string bufCdRewardAmount;
         private string bufTechNeo, bufTechMed, bufTechInd, bufTechSpacer, bufTechUltra, bufTechArch;
         private readonly Dictionary<string, string> bufPassionCosts = new Dictionary<string, string>();
 
@@ -67,7 +68,7 @@ namespace PawnSkillsReimagined
 
         private void DoGeneralTab(Rect inRect)
         {
-            float viewHeight = 20 * 32f + 40f;
+            float viewHeight = 21 * 32f + 40f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -131,6 +132,8 @@ namespace PawnSkillsReimagined
                 Rect cdRow = listing.GetRect(28f);
                 TooltipHandler.TipRegion(cdRow, "PSR_CdWantsEvery5_Desc".Translate());
                 Widgets.CheckboxLabeled(cdRow, "PSR_CdWantsEvery5".Translate(), ref Settings.cdSkillWantsEvery5);
+                IntRow(listing, "PSR_CdSkillRewardAmount".Translate(), ref Settings.cdSkillRewardAmount,
+                    ref bufCdRewardAmount, 1, 50, "PSR_CdSkillRewardAmount_Desc".Translate());
             }
             if (RadiusUIStyle.Available)
             {
@@ -430,6 +433,7 @@ namespace PawnSkillsReimagined
         public bool expertiseGainsXp = false;                 // (dual-level only) let skill-use XP also level expertise (VSE's feed)
         public int respecLevelInterval = 100;                 // character levels per +1 banked respec (earned in play)
         public bool cdSkillWantsEvery5 = false;              // Character Development: skill-level wants every 5 ranks instead of 10
+        public int cdSkillRewardAmount = 5;                   // Character Development: levels granted by its skill rewards (CD's own is 1)
         public bool radiusUIStyle = true;                     // when Radius UI is installed, draw our buttons in its style
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
         public float npcSkillRollStretch = 1.5f;              // NPC skill roll extends past vanilla's 20 cap by this factor
@@ -466,6 +470,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref expertiseGainsXp, "expertiseGainsXp", false);
             Scribe_Values.Look(ref respecLevelInterval, "respecLevelInterval", 100);
             Scribe_Values.Look(ref cdSkillWantsEvery5, "cdSkillWantsEvery5", false);
+            Scribe_Values.Look(ref cdSkillRewardAmount, "cdSkillRewardAmount", 5);
             Scribe_Values.Look(ref radiusUIStyle, "radiusUIStyle", true);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);
             Scribe_Values.Look(ref npcSkillRollStretch, "npcSkillRollStretch", 1.5f);

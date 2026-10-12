@@ -16,9 +16,11 @@ namespace PawnSkillsReimagined.CharacterDevelopment
         {
             var harmony = new Harmony("DanZinagri.PawnSkillsReimagined.CharacterDevelopment");
             Try("lift the skill-reward cap", () => SkillRewardCap.Patch(harmony));
+            Try("set skill-reward amounts", () => SkillRewardAmounts.Patch(harmony));
             Try("rescale skill-level wants", SkillLevelWants.Init);
             PawnSkillsReimaginedEvents.SkillRankBought += SkillIncreaseNotifier.Notify;
             PawnSkillsReimaginedEvents.SettingsClosed += SkillLevelWants.Sync;
+            PawnSkillsReimaginedEvents.SettingsClosed += SkillRewardAmounts.SyncDescriptions;
         }
 
         private static void Try(string what, Action action)
