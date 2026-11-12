@@ -27,6 +27,7 @@ namespace PawnSkillsReimagined
         private string bufRespecInterval;
         private string bufCdRewardAmount;
         private string bufHautsAwakening;
+        private string bufHautsManInBlack;
         private string bufTechNeo, bufTechMed, bufTechInd, bufTechSpacer, bufTechUltra, bufTechArch;
         private readonly Dictionary<string, string> bufPassionCosts = new Dictionary<string, string>();
 
@@ -178,6 +179,8 @@ namespace PawnSkillsReimagined
                 CompatHeader(listing, "PSR_CompatHautsTraits".Translate());
                 IntRow(listing, "PSR_HautsAwakeningSkill".Translate(), ref Settings.hautsAwakeningSkillLevel,
                     ref bufHautsAwakening, 1, Mathf.Max(20, Settings.maxSkillLevel), "PSR_HautsAwakeningSkill_Desc".Translate());
+                IntRow(listing, "PSR_HautsManInBlackSkill".Translate(), ref Settings.hautsManInBlackSkillLevel,
+                    ref bufHautsManInBlack, 1, Mathf.Max(20, Settings.maxSkillLevel), "PSR_HautsManInBlackSkill_Desc".Translate());
             }
             if (RadiusUIStyle.Available)
             {
@@ -489,6 +492,7 @@ namespace PawnSkillsReimagined
         public bool showSkillsMainButton = true;              // show the colony skills window button in the bottom bar
         public bool showSkillsInspectTab = true;              // show the Skills inspect tab on colonists (forced on while the bar button is hidden)
         public int hautsAwakeningSkillLevel = 50;             // Hauts' Added Traits: skill level that awakens a latent psychic (Hauts' own is 15)
+        public int hautsManInBlackSkillLevel = 30;            // Hauts' Added Traits: skill level for the Man in Black trait's daily check (Hauts' own is 15)
         public bool radiusUIStyle = true;                     // when Radius UI is installed, draw our buttons in its style
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
         public float npcSkillRollStretch = 1.5f;              // NPC skill roll extends past vanilla's 20 cap by this factor
@@ -527,6 +531,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref cdSkillWantsEvery5, "cdSkillWantsEvery5", false);
             Scribe_Values.Look(ref cdSkillRewardAmount, "cdSkillRewardAmount", 5);
             Scribe_Values.Look(ref hautsAwakeningSkillLevel, "hautsAwakeningSkillLevel", 50);
+            Scribe_Values.Look(ref hautsManInBlackSkillLevel, "hautsManInBlackSkillLevel", 30);
             Scribe_Values.Look(ref showSkillsMainButton, "showSkillsMainButton", true);
             Scribe_Values.Look(ref showSkillsInspectTab, "showSkillsInspectTab", true);
             Scribe_Values.Look(ref radiusUIStyle, "radiusUIStyle", true);

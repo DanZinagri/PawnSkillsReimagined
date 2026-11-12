@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -14,8 +14,8 @@ namespace PawnSkillsReimagined
     // early under this mod's raised cap. The threshold is a def field
     // (HediffCompProperties_LPMastery.skillLevel on HVT_LatentPsyHediff) that the
     // comp reads live every 60 ticks, so it is simply set from our setting. The Man
-    // in Black trait (Hediff_Aptenodytes) checks the same "skill 15" awakening
-    // condition with a hardcoded literal, so that one is transpiled to match.
+    // in Black trait (Hediff_Aptenodytes) has its own hardcoded "skill 15" check,
+    // transpiled to read a separate setting.
     // Both live in Hauts' Royalty assembly, which only loads with Royalty.
     public static class HautsTraitsCompat
     {
@@ -65,13 +65,13 @@ namespace PawnSkillsReimagined
             }
         }
 
-        // The configured awakening skill level, kept within the skill cap so it
-        // stays reachable.
-        public static int Threshold()
-        {
-            var settings = PawnSkillsReimaginedMod.Settings;
-            return Mathf.Clamp(settings.hautsAwakeningSkillLevel, 1, Mathf.Max(20, settings.maxSkillLevel));
-        }
+        // Configured skill levels, kept within the skill cap so they stay reachable.
+        public static int Threshold() => WithinCap(PawnSkillsReimaginedMod.Settings.hautsAwakeningSkillLevel);
+
+        public static int ManInBlackThreshold() => WithinCap(PawnSkillsReimaginedMod.Settings.hautsManInBlackSkillLevel);
+
+        private static int WithinCap(int level) =>
+            Mathf.Clamp(level, 1, Mathf.Max(20, PawnSkillsReimaginedMod.Settings.maxSkillLevel));
 
         public static void Apply()
         {
@@ -84,7 +84,7 @@ namespace PawnSkillsReimagined
         // The method's only int 15 is the skill check ("GetLevel(true) >= 15").
         public static IEnumerable<CodeInstruction> Threshold_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            MethodInfo threshold = AccessTools.Method(typeof(HautsTraitsCompat), nameof(Threshold));
+            MethodInfo threshold = AccessTools.Method(typeof(HautsTraitsCompat), nameof(ManInBlackThreshold));
             bool swapped = false;
             foreach (CodeInstruction instruction in instructions)
             {
