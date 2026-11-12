@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+    <MainButtonDef>
+        <defName>PSR_PawnSkills</defName>
+        <label>skills</label>
+        <description>Every colonist's level, unspent skill and expertise points, and expertise slots. Select a colonist to spend their points.</description>
+        <tabWindowClass>PawnSkillsReimagined.MainTabWindow_PawnSkills</tabWindowClass>
+        <workerClass>PawnSkillsReimagined.MainButtonWorker_PawnSkills</workerClass>
+        <order>35</order>
+        <closesWorldView>true</closesWorldView>
+    </MainButtonDef>
+
+</Defs>

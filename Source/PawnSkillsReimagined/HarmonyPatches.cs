@@ -115,7 +115,7 @@ namespace PawnSkillsReimagined
 
         public static void ModSettingsClosed_Postfix()
         {
-            ITab_SkillPoints.InvalidateCaches();
+            SkillPointsPanel.InvalidateCaches();
             PawnSkillsReimaginedEvents.RaiseSettingsClosed();
         }
 

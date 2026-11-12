@@ -55,6 +55,20 @@
     <PSR_TabGeneral>General</PSR_TabGeneral>
     <PSR_TabSkillCosts>Skill costs</PSR_TabSkillCosts>
     <PSR_TabPawnGen>Pawn generation</PSR_TabPawnGen>
+    <PSR_ShowMainButton>Show Skills button in the bottom bar</PSR_ShowMainButton>
+    <PSR_ShowMainButton_Desc>A colony-wide Skills window listing every colonist's level, unspent points and expertise slots. Select a colonist to spend their points beside the list.</PSR_ShowMainButton_Desc>
+    <PSR_ShowInspectTab>Show Skills tab on colonists</PSR_ShowInspectTab>
+    <PSR_ShowInspectTab_Desc>The Skills tab next to Bio and Social when a colonist is selected. Turn off to manage colonists from the bottom-bar window instead. Prisoners and other non-colonists keep the tab, and it stays shown while the bottom-bar button is hidden, so points can always be spent.</PSR_ShowInspectTab_Desc>
+    <PSR_ColPawn>Colonist</PSR_ColPawn>
+    <PSR_ColLevel>Lv</PSR_ColLevel>
+    <PSR_ColLevel_Desc>Character level.</PSR_ColLevel_Desc>
+    <PSR_ColPoints>Pts</PSR_ColPoints>
+    <PSR_ColPoints_Desc>Unspent skill points.</PSR_ColPoints_Desc>
+    <PSR_ColExpertisePoints>Exp</PSR_ColExpertisePoints>
+    <PSR_ColExpertisePoints_Desc>Unspent expertise points.</PSR_ColExpertisePoints_Desc>
+    <PSR_ColExpertise>Expertise</PSR_ColExpertise>
+    <PSR_ColExpertise_Desc>Expertise held, out of the most this colonist can hold.</PSR_ColExpertise_Desc>
+    <PSR_NoColonists>No colonists.</PSR_NoColonists>
     <PSR_TabCompat>Compatibility</PSR_TabCompat>
     <PSR_CompatNone>None of the mods this one integrates with are active.</PSR_CompatNone>
     <PSR_CompatCharacterDevelopment>Character Development</PSR_CompatCharacterDevelopment>

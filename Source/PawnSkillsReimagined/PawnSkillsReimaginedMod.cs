@@ -74,7 +74,7 @@ namespace PawnSkillsReimagined
 
         private void DoGeneralTab(Rect inRect)
         {
-            float viewHeight = 18 * 32f + 40f;
+            float viewHeight = 20 * 32f + 50f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -133,6 +133,16 @@ namespace PawnSkillsReimagined
                         ref Settings.xpSplitPct, ref bufXpSplit, 1, 99, "PSR_XpSplit_Desc".Translate());
                 }
             }
+            listing.Gap(4f);
+            Rect barRow = listing.GetRect(28f);
+            TooltipHandler.TipRegion(barRow, "PSR_ShowMainButton_Desc".Translate());
+            Widgets.CheckboxLabeled(barRow, "PSR_ShowMainButton".Translate(), ref Settings.showSkillsMainButton);
+            // The tab can only be hidden while the bottom-bar window is available.
+            Rect tabRow = listing.GetRect(28f);
+            TooltipHandler.TipRegion(tabRow, "PSR_ShowInspectTab_Desc".Translate());
+            Widgets.CheckboxLabeled(tabRow, "PSR_ShowInspectTab".Translate(), ref Settings.showSkillsInspectTab,
+                disabled: !Settings.showSkillsMainButton);
+
             listing.Gap(4f);
             Text.Font = GameFont.Tiny;
             GUI.color = Color.gray;
@@ -476,6 +486,8 @@ namespace PawnSkillsReimagined
         public int respecLevelInterval = 100;                 // character levels per +1 banked respec (earned in play)
         public bool cdSkillWantsEvery5 = false;              // Character Development: skill-level wants every 5 ranks instead of 10
         public int cdSkillRewardAmount = 5;                   // Character Development: levels granted by its skill rewards (CD's own is 1)
+        public bool showSkillsMainButton = true;              // show the colony skills window button in the bottom bar
+        public bool showSkillsInspectTab = true;              // show the Skills inspect tab on colonists (forced on while the bar button is hidden)
         public int hautsAwakeningSkillLevel = 50;             // Hauts' Added Traits: skill level that awakens a latent psychic (Hauts' own is 15)
         public bool radiusUIStyle = true;                     // when Radius UI is installed, draw our buttons in its style
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
@@ -515,6 +527,8 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref cdSkillWantsEvery5, "cdSkillWantsEvery5", false);
             Scribe_Values.Look(ref cdSkillRewardAmount, "cdSkillRewardAmount", 5);
             Scribe_Values.Look(ref hautsAwakeningSkillLevel, "hautsAwakeningSkillLevel", 50);
+            Scribe_Values.Look(ref showSkillsMainButton, "showSkillsMainButton", true);
+            Scribe_Values.Look(ref showSkillsInspectTab, "showSkillsInspectTab", true);
             Scribe_Values.Look(ref radiusUIStyle, "radiusUIStyle", true);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);
             Scribe_Values.Look(ref npcSkillRollStretch, "npcSkillRollStretch", 1.5f);
