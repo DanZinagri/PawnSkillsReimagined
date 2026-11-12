@@ -99,6 +99,8 @@ namespace PawnSkillsReimagined
             ExpertiseUnlockCompat.Patch(harmony);
 
             HautsTraitsCompat.Init(harmony);
+            MainButtonWorker_PawnSkills.ApplyIconSetting();
+            PawnSkillsReimaginedEvents.SettingsClosed += MainButtonWorker_PawnSkills.ApplyIconSetting;
 
             InjectSkillPointsTab();
         }

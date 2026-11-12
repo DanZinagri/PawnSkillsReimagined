@@ -57,6 +57,8 @@
     <PSR_TabPawnGen>Pawn generation</PSR_TabPawnGen>
     <PSR_ShowMainButton>Show Skills button in the bottom bar</PSR_ShowMainButton>
     <PSR_ShowMainButton_Desc>A colony-wide Skills window listing every colonist's level, unspent points and expertise slots. Select a colonist to spend their points beside the list.</PSR_ShowMainButton_Desc>
+    <PSR_SkillsButtonIcon>Use an icon for the Skills button</PSR_SkillsButtonIcon>
+    <PSR_SkillsButtonIcon_Desc>Show the bottom-bar Skills button as a compact icon instead of the "Skills" label. Hover it to see its name.</PSR_SkillsButtonIcon_Desc>
     <PSR_ShowInspectTab>Show Skills tab on colonists</PSR_ShowInspectTab>
     <PSR_ShowInspectTab_Desc>The Skills tab next to Bio and Social when a colonist is selected. Turn off to manage colonists from the bottom-bar window instead. Prisoners and other non-colonists keep the tab, and it stays shown while the bottom-bar button is hidden, so points can always be spent.</PSR_ShowInspectTab_Desc>
     <PSR_ColPawn>Colonist</PSR_ColPawn>

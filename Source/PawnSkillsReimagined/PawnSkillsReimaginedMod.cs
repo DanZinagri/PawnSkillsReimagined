@@ -75,7 +75,7 @@ namespace PawnSkillsReimagined
 
         private void DoGeneralTab(Rect inRect)
         {
-            float viewHeight = 20 * 32f + 50f;
+            float viewHeight = 21 * 32f + 50f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -138,6 +138,10 @@ namespace PawnSkillsReimagined
             Rect barRow = listing.GetRect(28f);
             TooltipHandler.TipRegion(barRow, "PSR_ShowMainButton_Desc".Translate());
             Widgets.CheckboxLabeled(barRow, "PSR_ShowMainButton".Translate(), ref Settings.showSkillsMainButton);
+            Rect iconRow = listing.GetRect(28f);
+            TooltipHandler.TipRegion(iconRow, "PSR_SkillsButtonIcon_Desc".Translate());
+            Widgets.CheckboxLabeled(iconRow, "PSR_SkillsButtonIcon".Translate(), ref Settings.skillsButtonIcon,
+                disabled: !Settings.showSkillsMainButton);
             // The tab can only be hidden while the bottom-bar window is available.
             Rect tabRow = listing.GetRect(28f);
             TooltipHandler.TipRegion(tabRow, "PSR_ShowInspectTab_Desc".Translate());
@@ -490,6 +494,7 @@ namespace PawnSkillsReimagined
         public bool cdSkillWantsEvery5 = false;              // Character Development: skill-level wants every 5 ranks instead of 10
         public int cdSkillRewardAmount = 5;                   // Character Development: levels granted by its skill rewards (CD's own is 1)
         public bool showSkillsMainButton = true;              // show the colony skills window button in the bottom bar
+        public bool skillsButtonIcon = true;                  // draw that button as a compact icon instead of the "skills" label
         public bool showSkillsInspectTab = true;              // show the Skills inspect tab on colonists (forced on while the bar button is hidden)
         public int hautsAwakeningSkillLevel = 50;             // Hauts' Added Traits: skill level that awakens a latent psychic (Hauts' own is 15)
         public int hautsManInBlackSkillLevel = 30;            // Hauts' Added Traits: skill level for the Man in Black trait's daily check (Hauts' own is 15)
@@ -533,6 +538,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref hautsAwakeningSkillLevel, "hautsAwakeningSkillLevel", 50);
             Scribe_Values.Look(ref hautsManInBlackSkillLevel, "hautsManInBlackSkillLevel", 30);
             Scribe_Values.Look(ref showSkillsMainButton, "showSkillsMainButton", true);
+            Scribe_Values.Look(ref skillsButtonIcon, "skillsButtonIcon", true);
             Scribe_Values.Look(ref showSkillsInspectTab, "showSkillsInspectTab", true);
             Scribe_Values.Look(ref radiusUIStyle, "radiusUIStyle", true);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);

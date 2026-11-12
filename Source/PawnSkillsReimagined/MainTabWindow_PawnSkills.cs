@@ -1,5 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -11,7 +13,28 @@ namespace PawnSkillsReimagined
     // Bottom-bar button for the colony skills window; hidden when turned off in settings.
     public class MainButtonWorker_PawnSkills : MainButtonWorker_ToggleTab
     {
+        private const string DefName = "PSR_PawnSkills";
+        private const string IconPath = "UI/Buttons/MainButtons/PSR_PawnSkills";
+        // MainButtonDef caches its loaded texture privately.
+        private static readonly FieldInfo IconCache = AccessTools.Field(typeof(MainButtonDef), "icon");
+
         public override bool Visible => base.Visible && PawnSkillsReimaginedMod.Settings.showSkillsMainButton;
+
+        // Icon or text button, per the setting. Vanilla draws the icon and drops the
+        // label whenever the def has one, and lays the bar out from `minimized` every
+        // frame, so both are switched together. Runs at startup and on settings close.
+        public static void ApplyIconSetting()
+        {
+            MainButtonDef def = DefDatabase<MainButtonDef>.GetNamedSilentFail(DefName);
+            if (def == null)
+            {
+                return;
+            }
+            bool useIcon = PawnSkillsReimaginedMod.Settings.skillsButtonIcon;
+            def.iconPath = useIcon ? IconPath : null;
+            def.minimized = useIcon;
+            IconCache?.SetValue(def, null);
+        }
     }
 
     // Colony-wide skills window: a narrow list of every free colonist with their
