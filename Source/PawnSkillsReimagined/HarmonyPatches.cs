@@ -98,6 +98,8 @@ namespace PawnSkillsReimagined
 
             ExpertiseUnlockCompat.Patch(harmony);
 
+            HautsTraitsCompat.Init(harmony);
+
             InjectSkillPointsTab();
         }
 

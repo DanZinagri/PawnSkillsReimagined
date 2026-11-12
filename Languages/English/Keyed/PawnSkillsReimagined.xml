@@ -55,6 +55,13 @@
     <PSR_TabGeneral>General</PSR_TabGeneral>
     <PSR_TabSkillCosts>Skill costs</PSR_TabSkillCosts>
     <PSR_TabPawnGen>Pawn generation</PSR_TabPawnGen>
+    <PSR_TabCompat>Compatibility</PSR_TabCompat>
+    <PSR_CompatNone>None of the mods this one integrates with are active.</PSR_CompatNone>
+    <PSR_CompatCharacterDevelopment>Character Development</PSR_CompatCharacterDevelopment>
+    <PSR_CompatHautsTraits>Hauts' Added Traits</PSR_CompatHautsTraits>
+    <PSR_CompatRadiusUI>Radius UI</PSR_CompatRadiusUI>
+    <PSR_HautsAwakeningSkill>Latent psychic awakening skill level</PSR_HautsAwakeningSkill>
+    <PSR_HautsAwakeningSkill_Desc>A Latent Psychic pawn awakens when any skill reaches this level. Hauts' Added Traits uses 15, which comes very early under this mod's raised skill cap. The Man in Black trait's daily skill check uses the same level. Kept within the skill cap so it stays reachable.</PSR_HautsAwakeningSkill_Desc>
     <PSR_TechHeader>Tech-level starting XP</PSR_TechHeader>
     <PSR_TechNote>Extra starting XP for generated NPCs based on their faction's tech level, so higher-tech pawns come out better trained. Also adds per-pawn variance so some pawns stand out. Does not affect your own starting colonists. Animal factions use the Neolithic value; factions with no tech level use Industrial.</PSR_TechNote>
     <PSR_TechMult_Desc>Multiplier applied to this tech level's NPC starting XP. 1.0 = the standard roll, higher = more skilled, lower = less.</PSR_TechMult_Desc>

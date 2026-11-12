@@ -26,6 +26,7 @@ namespace PawnSkillsReimagined
         private string bufXpSplit;
         private string bufRespecInterval;
         private string bufCdRewardAmount;
+        private string bufHautsAwakening;
         private string bufTechNeo, bufTechMed, bufTechInd, bufTechSpacer, bufTechUltra, bufTechArch;
         private readonly Dictionary<string, string> bufPassionCosts = new Dictionary<string, string>();
 
@@ -48,6 +49,7 @@ namespace PawnSkillsReimagined
                 new TabRecord("PSR_TabGeneral".Translate(), () => settingsTab = 0, settingsTab == 0),
                 new TabRecord("PSR_TabSkillCosts".Translate(), () => settingsTab = 2, settingsTab == 2),
                 new TabRecord("PSR_TabPawnGen".Translate(), () => settingsTab = 1, settingsTab == 1),
+                new TabRecord("PSR_TabCompat".Translate(), () => settingsTab = 3, settingsTab == 3),
             };
             Widgets.DrawMenuSection(body);
             TabDrawer.DrawTabs(body, tabs);
@@ -60,6 +62,10 @@ namespace PawnSkillsReimagined
             {
                 DoSkillCostsTab(content);
             }
+            else if (settingsTab == 3)
+            {
+                DoCompatTab(content);
+            }
             else
             {
                 DoGeneralTab(content);
@@ -68,7 +74,7 @@ namespace PawnSkillsReimagined
 
         private void DoGeneralTab(Rect inRect)
         {
-            float viewHeight = 21 * 32f + 40f;
+            float viewHeight = 18 * 32f + 40f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref settingsScroll, viewRect);
 
@@ -127,21 +133,6 @@ namespace PawnSkillsReimagined
                         ref Settings.xpSplitPct, ref bufXpSplit, 1, 99, "PSR_XpSplit_Desc".Translate());
                 }
             }
-            if (ModsConfig.IsActive("ferny.characterdevelopment"))
-            {
-                Rect cdRow = listing.GetRect(28f);
-                TooltipHandler.TipRegion(cdRow, "PSR_CdWantsEvery5_Desc".Translate());
-                Widgets.CheckboxLabeled(cdRow, "PSR_CdWantsEvery5".Translate(), ref Settings.cdSkillWantsEvery5);
-                IntRow(listing, "PSR_CdSkillRewardAmount".Translate(), ref Settings.cdSkillRewardAmount,
-                    ref bufCdRewardAmount, 1, 50, "PSR_CdSkillRewardAmount_Desc".Translate());
-            }
-            if (RadiusUIStyle.Available)
-            {
-                Rect radiusRow = listing.GetRect(28f);
-                TooltipHandler.TipRegion(radiusRow, "PSR_RadiusStyle_Desc".Translate());
-                Widgets.CheckboxLabeled(radiusRow, "PSR_RadiusStyle".Translate(), ref Settings.radiusUIStyle);
-            }
-
             listing.Gap(4f);
             Text.Font = GameFont.Tiny;
             GUI.color = Color.gray;
@@ -151,6 +142,57 @@ namespace PawnSkillsReimagined
 
             listing.End();
             Widgets.EndScrollView();
+        }
+
+        // One-off integrations with other mods; each section only shows when its
+        // mod is active.
+        private void DoCompatTab(Rect inRect)
+        {
+            var listing = new Listing_Standard();
+            listing.Begin(inRect);
+            bool any = false;
+
+            if (ModsConfig.IsActive("ferny.characterdevelopment"))
+            {
+                any = true;
+                CompatHeader(listing, "PSR_CompatCharacterDevelopment".Translate());
+                Rect cdRow = listing.GetRect(28f);
+                TooltipHandler.TipRegion(cdRow, "PSR_CdWantsEvery5_Desc".Translate());
+                Widgets.CheckboxLabeled(cdRow, "PSR_CdWantsEvery5".Translate(), ref Settings.cdSkillWantsEvery5);
+                IntRow(listing, "PSR_CdSkillRewardAmount".Translate(), ref Settings.cdSkillRewardAmount,
+                    ref bufCdRewardAmount, 1, 50, "PSR_CdSkillRewardAmount_Desc".Translate());
+            }
+            if (HautsTraitsCompat.Active)
+            {
+                any = true;
+                CompatHeader(listing, "PSR_CompatHautsTraits".Translate());
+                IntRow(listing, "PSR_HautsAwakeningSkill".Translate(), ref Settings.hautsAwakeningSkillLevel,
+                    ref bufHautsAwakening, 1, Mathf.Max(20, Settings.maxSkillLevel), "PSR_HautsAwakeningSkill_Desc".Translate());
+            }
+            if (RadiusUIStyle.Available)
+            {
+                any = true;
+                CompatHeader(listing, "PSR_CompatRadiusUI".Translate());
+                Rect radiusRow = listing.GetRect(28f);
+                TooltipHandler.TipRegion(radiusRow, "PSR_RadiusStyle_Desc".Translate());
+                Widgets.CheckboxLabeled(radiusRow, "PSR_RadiusStyle".Translate(), ref Settings.radiusUIStyle);
+            }
+
+            if (!any)
+            {
+                GUI.color = Color.gray;
+                listing.Label("PSR_CompatNone".Translate());
+                GUI.color = Color.white;
+            }
+            listing.End();
+        }
+
+        private static void CompatHeader(Listing_Standard listing, string label)
+        {
+            listing.Gap(4f);
+            GUI.color = new Color(1f, 0.85f, 0.3f);
+            listing.Label(label);
+            GUI.color = Color.white;
         }
 
         private void DoSkillCostsTab(Rect inRect)
@@ -434,6 +476,7 @@ namespace PawnSkillsReimagined
         public int respecLevelInterval = 100;                 // character levels per +1 banked respec (earned in play)
         public bool cdSkillWantsEvery5 = false;              // Character Development: skill-level wants every 5 ranks instead of 10
         public int cdSkillRewardAmount = 5;                   // Character Development: levels granted by its skill rewards (CD's own is 1)
+        public int hautsAwakeningSkillLevel = 50;             // Hauts' Added Traits: skill level that awakens a latent psychic (Hauts' own is 15)
         public bool radiusUIStyle = true;                     // when Radius UI is installed, draw our buttons in its style
         public float startingXpMultiplier = 1f;               // generated pawns' rolled-XP seed; 0 disables
         public float npcSkillRollStretch = 1.5f;              // NPC skill roll extends past vanilla's 20 cap by this factor
@@ -471,6 +514,7 @@ namespace PawnSkillsReimagined
             Scribe_Values.Look(ref respecLevelInterval, "respecLevelInterval", 100);
             Scribe_Values.Look(ref cdSkillWantsEvery5, "cdSkillWantsEvery5", false);
             Scribe_Values.Look(ref cdSkillRewardAmount, "cdSkillRewardAmount", 5);
+            Scribe_Values.Look(ref hautsAwakeningSkillLevel, "hautsAwakeningSkillLevel", 50);
             Scribe_Values.Look(ref radiusUIStyle, "radiusUIStyle", true);
             Scribe_Values.Look(ref startingXpMultiplier, "startingXpMultiplier", 1f);
             Scribe_Values.Look(ref npcSkillRollStretch, "npcSkillRollStretch", 1.5f);
