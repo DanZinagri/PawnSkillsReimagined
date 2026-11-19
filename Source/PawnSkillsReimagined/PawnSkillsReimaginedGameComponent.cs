@@ -34,6 +34,20 @@ namespace PawnSkillsReimagined
         public Dictionary<SkillDef, int> boughtPoints;
         public Dictionary<VSE.Expertise.ExpertiseDef, int> boughtExpertise;
 
+        // Starts progression over for a pawn whose skills were regenerated: level,
+        // XP, points and every purchase record. Respecs earned in play are kept.
+        public void ResetForNewSkills()
+        {
+            level = 1;
+            xp = 0f;
+            spentPoints = 0;
+            expertisePoints = 0;
+            skillFloor = null;
+            boughtRanks = null;
+            boughtPoints = null;
+            boughtExpertise = null;
+        }
+
         public void ExposeData()
         {
             Scribe_Values.Look(ref level, "level", 1);

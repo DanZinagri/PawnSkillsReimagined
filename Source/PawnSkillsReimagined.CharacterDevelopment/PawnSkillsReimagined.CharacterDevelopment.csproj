@@ -2,26 +2,59 @@
 
 	<!-- Character Development integration. Built separately because its types
 	     inherit from and call into Character Development; it lives in a
-	     LoadFolders folder that only loads when that mod is active. -->
+	     LoadFolders folder that only loads when that mod is active.
+	     Two builds: net48 -> 1.6/Mods/CharacterDevelopment, net10.0 -> 1.7/Mods/CharacterDevelopment. -->
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
+		<TargetFrameworks>net48;net10.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<RootNamespace>PawnSkillsReimagined.CharacterDevelopment</RootNamespace>
 		<AssemblyName>PawnSkillsReimagined.CharacterDevelopment</AssemblyName>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<IntermediateOutputPath>obj\$(Configuration)\$(TargetFramework)\</IntermediateOutputPath>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
+		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
 		<Nullable>disable</Nullable>
 		<DebugType>embedded</DebugType>
 		<!-- Point these at your own installs if they live somewhere else. -->
+		<RimWorld16Ref>C:\Users\DanZinagri\Documents\RimWorldModding\RimWorld-1.6-Ref</RimWorld16Ref>
 		<RimWorldManagedDir>E:\SteamLibrary\steamapps\common\RimWorld</RimWorldManagedDir>
-		<HarmonyDir>E:\SteamLibrary\steamapps\workshop\content\294100\2009463077\1.7\Assemblies</HarmonyDir>
-		<VSEDir>E:\SteamLibrary\steamapps\workshop\content\294100\3400246558\1.6\Assemblies</VSEDir>
-		<CharacterDevelopmentDir>E:\SteamLibrary\steamapps\workshop\content\294100\3770112044\1.6\Assemblies</CharacterDevelopmentDir>
+		<Workshop>E:\SteamLibrary\steamapps\workshop\content\294100</Workshop>
+		<VSEDir>$(Workshop)\3400246558\1.6\Assemblies</VSEDir>
+		<CharacterDevelopmentDir>$(Workshop)\3770112044\1.6\Assemblies</CharacterDevelopmentDir>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
+		<OutputPath>..\..\1.6\Mods\CharacterDevelopment\Assemblies\</OutputPath>
+		<FrameworkPathOverride>$(RimWorld16Ref)</FrameworkPathOverride>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
 		<OutputPath>..\..\1.7\Mods\CharacterDevelopment\Assemblies\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Reference Include="VSE">
+			<HintPath>$(VSEDir)\VSE.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="WantsAndQuirks">
+			<HintPath>$(CharacterDevelopmentDir)\WantsAndQuirks.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+		<Reference Include="Assembly-CSharp"><HintPath>$(RimWorld16Ref)\Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="UnityEngine"><HintPath>$(RimWorld16Ref)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="UnityEngine.CoreModule"><HintPath>$(RimWorld16Ref)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="UnityEngine.IMGUIModule"><HintPath>$(RimWorld16Ref)\UnityEngine.IMGUIModule.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(RimWorld16Ref)\UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="netstandard"><HintPath>$(RimWorld16Ref)\netstandard.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="0Harmony"><HintPath>$(Workshop)\2009463077\1.6\Assemblies\0Harmony.dll</HintPath><Private>false</Private></Reference>
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
 		<Reference Include="Assembly-CSharp">
 			<HintPath>$(RimWorldManagedDir)\Assembly-CSharp.dll</HintPath>
 			<Private>false</Private>
@@ -36,15 +69,7 @@
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="0Harmony">
-			<HintPath>$(HarmonyDir)\0Harmony.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="VSE">
-			<HintPath>$(VSEDir)\VSE.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="WantsAndQuirks">
-			<HintPath>$(CharacterDevelopmentDir)\WantsAndQuirks.dll</HintPath>
+			<HintPath>$(Workshop)\2009463077\1.7\Assemblies\0Harmony.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
 	</ItemGroup>

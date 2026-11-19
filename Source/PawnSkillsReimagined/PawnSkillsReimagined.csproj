@@ -1,23 +1,58 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+	<!-- One project, two builds:
+	     net48   -> 1.6/Assemblies, compiled against the 1.6 reference assemblies.
+	     net10.0 -> 1.7/Assemblies, compiled against the 1.7 game root (Waylith / UnityStubs). -->
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
+		<TargetFrameworks>net48;net10.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<RootNamespace>PawnSkillsReimagined</RootNamespace>
 		<AssemblyName>PawnSkillsReimagined</AssemblyName>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<!-- AppendTargetFrameworkToOutputPath=false also flattens obj\, so each target gets its own
+		     intermediate folder or the parallel builds overwrite each other. -->
+		<IntermediateOutputPath>obj\$(Configuration)\$(TargetFramework)\</IntermediateOutputPath>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
+		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
 		<Nullable>disable</Nullable>
 		<DebugType>embedded</DebugType>
 		<!-- Point these at your own installs if they live somewhere else. -->
+		<RimWorld16Ref>C:\Users\DanZinagri\Documents\RimWorldModding\RimWorld-1.6-Ref</RimWorld16Ref>
 		<RimWorldManagedDir>E:\SteamLibrary\steamapps\common\RimWorld</RimWorldManagedDir>
-		<HarmonyDir>E:\SteamLibrary\steamapps\workshop\content\294100\2009463077\1.7\Assemblies</HarmonyDir>
-		<VSEDir>E:\SteamLibrary\steamapps\workshop\content\294100\3400246558\1.6\Assemblies</VSEDir>
+		<Workshop>E:\SteamLibrary\steamapps\workshop\content\294100</Workshop>
+		<VSEDir>$(Workshop)\3400246558\1.6\Assemblies</VSEDir>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
+		<OutputPath>..\..\1.6\Assemblies\</OutputPath>
+		<FrameworkPathOverride>$(RimWorld16Ref)</FrameworkPathOverride>
+		<DefineConstants>$(DefineConstants);RW16</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
 		<OutputPath>..\..\1.7\Assemblies\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Reference Include="VSE">
+			<HintPath>$(VSEDir)\VSE.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+		<Reference Include="Assembly-CSharp"><HintPath>$(RimWorld16Ref)\Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="UnityEngine"><HintPath>$(RimWorld16Ref)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="UnityEngine.CoreModule"><HintPath>$(RimWorld16Ref)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="UnityEngine.IMGUIModule"><HintPath>$(RimWorld16Ref)\UnityEngine.IMGUIModule.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(RimWorld16Ref)\UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="UnityEngine.InputLegacyModule"><HintPath>$(RimWorld16Ref)\UnityEngine.InputLegacyModule.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="netstandard"><HintPath>$(RimWorld16Ref)\netstandard.dll</HintPath><Private>false</Private></Reference>
+		<Reference Include="0Harmony"><HintPath>$(Workshop)\2009463077\1.6\Assemblies\0Harmony.dll</HintPath><Private>false</Private></Reference>
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
 		<Reference Include="Assembly-CSharp">
 			<HintPath>$(RimWorldManagedDir)\Assembly-CSharp.dll</HintPath>
 			<Private>false</Private>
@@ -32,11 +67,7 @@
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="0Harmony">
-			<HintPath>$(HarmonyDir)\0Harmony.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="VSE">
-			<HintPath>$(VSEDir)\VSE.dll</HintPath>
+			<HintPath>$(Workshop)\2009463077\1.7\Assemblies\0Harmony.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
 	</ItemGroup>

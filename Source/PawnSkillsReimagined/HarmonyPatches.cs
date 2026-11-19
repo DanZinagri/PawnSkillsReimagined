@@ -320,11 +320,18 @@ namespace PawnSkillsReimagined
             }
 
             var comp = PawnSkillsReimaginedGameComponent.Instance;
-            // Newly generated player-faction pawns start with one banked respec;
-            // NPCs never spawn with any (level-based respecs only accrue in play).
+            // Skills regenerated for a pawn that already has progress (VPE's mind
+            // wipe, editors re-rolling skills): every rank it bought or earned is
+            // gone, so its level and points start over too and the starting XP below
+            // re-seeds it like a new pawn. Without this the old spent points stay
+            // charged and each re-roll stacks more starting XP.
+            comp?.GetProgressOrNull(pawn)?.ResetForNewSkills();
+            // Player-faction pawns start with one banked respec (more are kept if
+            // already earned in play); NPCs never spawn with any.
             if (comp != null && !npc)
             {
-                comp.For(pawn).respecPoints = 1;
+                PawnProgress progress = comp.For(pawn);
+                progress.respecPoints = Mathf.Max(progress.respecPoints, 1);
             }
             float multiplier = PawnSkillsReimaginedMod.Settings.startingXpMultiplier;
             if (comp == null || rolledXp <= 0f || multiplier <= 0f)
